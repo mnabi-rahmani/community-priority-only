@@ -1,0 +1,114 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Assets and Community Priorities</title>
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
+  <link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+  <section id="authScreen" class="auth-screen" aria-label="Sign in to Community Priorities">
+    <form id="authForm" class="auth-card">
+      <p class="eyebrow">Community Priorities Map</p>
+      <h1>Sign in</h1>
+      <p class="lead">Use your existing Community Profile App username and password.</p>
+      <div class="auth-field">
+        <label for="authUserId">Username</label>
+        <input id="authUserId" name="userId" type="text" autocomplete="username" required>
+      </div>
+      <div class="auth-field">
+        <label for="authPassword">Password</label>
+        <input id="authPassword" name="password" type="password" autocomplete="current-password" required>
+      </div>
+      <p id="authMessage" class="auth-message" role="alert" hidden></p>
+      <button id="authSubmit" class="auth-submit" type="submit">Sign in</button>
+      <p class="auth-help">Authorized users: <strong>super_admin</strong> and <strong>clusters_admin</strong>.</p>
+    </form>
+  </section>
+
+  <nav class="map-nav" id="mapNav" aria-label="Map views"></nav>
+
+  <div id="map" aria-label="Assets and Community Priorities interactive map"></div>
+
+  <aside class="side">
+    <div class="side-header-controls">
+      <button type="button" id="sideHeaderToggle" class="side-header-toggle" aria-expanded="true" aria-controls="sideIntroPanel">
+        <span class="side-header-toggle-label">Hide panel</span>
+      </button>
+    </div>
+    <div id="sideIntroPanel" class="side-intro-panel">
+      <header class="side-header">
+        <p class="eyebrow">Baghlan-e-Jadid &amp; Nawabad, Kunduz</p>
+        <h1>Assets and Community Priorities</h1>
+        <p class="lead">
+          Photo-backed community priorities from FGD needs prioritization, overlaid on the Integrated Locations Database with Maps V8 styling. Each numbered marker links to a field photo and community priority note.
+        </p>
+        <span class="badge" id="priorityBadge">Photo-backed priorities + Integrated Locations Database</span>
+        <div id="authUserPanel" class="auth-user-panel" hidden>
+          <span id="authUserLabel"></span>
+          <button id="authLogout" type="button">Sign out</button>
+        </div>
+        <div class="legend">
+          <span><i class="dot cluster"></i>Cluster boundary</span>
+          <span><i class="dot community"></i>Community boundary</span>
+          <span><i class="dot"></i>Flood / DRR</span>
+          <span><i class="dot wash"></i>WASH</span>
+          <span><i class="dot education"></i>Education</span>
+          <span><i class="dot irrigation"></i>Irrigation</span>
+          <span><i class="dot road"></i>Road access</span>
+          <span><i class="dot health"></i>Health</span>
+        </div>
+      </header>
+
+      <section class="section filters">
+        <h2>Filter map</h2>
+        <div class="filter-field">
+          <label for="basemapFilter">Base map</label>
+          <select id="basemapFilter"></select>
+        </div>
+        <div class="filter-field">
+          <label for="clusterFilter">Cluster</label>
+          <select id="clusterFilter"></select>
+        </div>
+        <div class="filter-field">
+          <label for="villageFilter">Village</label>
+          <select id="villageFilter"></select>
+        </div>
+        <p class="filter-summary" id="filterSummary"></p>
+        <div class="filter-field layer-toggle-field">
+          <label class="layer-toggle-all-sidebar" for="toggleAllLayersSidebar">
+            <input type="checkbox" id="toggleAllLayersSidebar" checked>
+            Show all map layers
+          </label>
+        </div>
+      </section>
+
+      <section class="section">
+        <h2>Community needs story</h2>
+        <p id="storyText">
+          Across Baghlan and Nawabad, community FGDs identified recurring needs around flood protection, WASH, education facilities, road access, health services, and shelter. Use the cluster and village filters to explore photo-backed evidence linked to each priority theme.
+        </p>
+      </section>
+
+      <div class="cards" id="cards"></div>
+      <div class="cards-empty" id="cardsEmpty" hidden>No photo-backed priorities match the current filter.</div>
+    </div>
+  </aside>
+
+  <div id="photoLightbox" class="photo-lightbox" hidden>
+    <button type="button" class="photo-lightbox-close" aria-label="Close expanded photo">&times;</button>
+    <button type="button" class="photo-lightbox-nav photo-lightbox-prev" aria-label="Previous photo" hidden>&lsaquo;</button>
+    <img class="photo-lightbox-image" src="" alt="">
+    <div class="photo-lightbox-message" hidden>Unable to load this photo preview.</div>
+    <button type="button" class="photo-lightbox-nav photo-lightbox-next" aria-label="Next photo" hidden>&rsaquo;</button>
+    <div class="photo-lightbox-counter" hidden></div>
+  </div>
+  <script src="cursor_v2_map_data/photo_backed_priorities.js"></script>
+  <script src="cursor_v2_map_data/layers_bundle.js"></script>
+  <script src="cursor_v2_map_data/photo_index.js"></script>
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="src/config.js"></script>
+  <script src="src/app.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+node_modules/
+.serverless/
+.build/
+.env
+.env.local
+*.log
+gh-auth-*.txt
+
+# Local source assets; do not commit to GitHub.
+Assets Needed/
+deployed/Assets Needed/
+
+# Legacy recovery artifacts (removed from repo scope)
+recovered/

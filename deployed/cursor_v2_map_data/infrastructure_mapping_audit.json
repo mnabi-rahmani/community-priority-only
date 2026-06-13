@@ -1,0 +1,187 @@
+{
+  "summary": {
+    "spreadsheetTotal": 91,
+    "spreadsheetWithCoordinates": 85,
+    "spreadsheetMissingCoordinates": 6,
+    "currentlyMappedInMap": 85,
+    "exactlyMapped": 85,
+    "unmappedWithCoordinates": 0,
+    "extraMapEntries": 0,
+    "mappedWithPhotos": 47,
+    "mappedWithoutPhotos": 38
+  },
+  "byCluster": {
+    "Cluster 1": {
+      "total": 10,
+      "withCoords": 10,
+      "mapped": 10,
+      "missingCoords": 0,
+      "unmapped": 0,
+      "withPhotos": 5
+    },
+    "Cluster 2": {
+      "total": 9,
+      "withCoords": 7,
+      "mapped": 7,
+      "missingCoords": 2,
+      "unmapped": 0,
+      "withPhotos": 5
+    },
+    "Cluster 3": {
+      "total": 8,
+      "withCoords": 8,
+      "mapped": 8,
+      "missingCoords": 0,
+      "unmapped": 0,
+      "withPhotos": 2
+    },
+    "Cluster 4": {
+      "total": 8,
+      "withCoords": 8,
+      "mapped": 8,
+      "missingCoords": 0,
+      "unmapped": 0,
+      "withPhotos": 4
+    },
+    "Cluster 5": {
+      "total": 6,
+      "withCoords": 6,
+      "mapped": 6,
+      "missingCoords": 0,
+      "unmapped": 0,
+      "withPhotos": 4
+    },
+    "Cluster 6": {
+      "total": 5,
+      "withCoords": 5,
+      "mapped": 5,
+      "missingCoords": 0,
+      "unmapped": 0,
+      "withPhotos": 3
+    },
+    "Cluster 7": {
+      "total": 10,
+      "withCoords": 10,
+      "mapped": 10,
+      "missingCoords": 0,
+      "unmapped": 0,
+      "withPhotos": 7
+    },
+    "Cluster 8": {
+      "total": 8,
+      "withCoords": 8,
+      "mapped": 8,
+      "missingCoords": 0,
+      "unmapped": 0,
+      "withPhotos": 3
+    },
+    "Cluster 9": {
+      "total": 7,
+      "withCoords": 7,
+      "mapped": 7,
+      "missingCoords": 0,
+      "unmapped": 0,
+      "withPhotos": 5
+    },
+    "Cluster 10": {
+      "total": 6,
+      "withCoords": 5,
+      "mapped": 5,
+      "missingCoords": 1,
+      "unmapped": 0,
+      "withPhotos": 3
+    },
+    "Cluster 11": {
+      "total": 7,
+      "withCoords": 7,
+      "mapped": 7,
+      "missingCoords": 0,
+      "unmapped": 0,
+      "withPhotos": 5
+    },
+    "Nawabad Cluster": {
+      "total": 7,
+      "withCoords": 4,
+      "mapped": 4,
+      "missingCoords": 3,
+      "unmapped": 0,
+      "withPhotos": 1
+    }
+  },
+  "missingFromMap": [],
+  "spreadsheetMissingCoordinates": [
+    {
+      "region": "Baghlan-e-Jadid",
+      "cluster": "Cluster 2",
+      "sheetName": "cluster 2",
+      "rowNumber": 5,
+      "intervention": "Leveling and graveling",
+      "location": "Territorial road in Mula Toor sub-village",
+      "level": "High",
+      "lat": null,
+      "lon": null,
+      "hasCoordinates": false
+    },
+    {
+      "region": "Baghlan-e-Jadid",
+      "cluster": "Cluster 2",
+      "sheetName": "cluster 2",
+      "rowNumber": 6,
+      "intervention": "Re leveling and graveling",
+      "location": "Main circular road of all five sub-villages",
+      "level": "High",
+      "lat": null,
+      "lon": null,
+      "hasCoordinates": false
+    },
+    {
+      "region": "Baghlan-e-Jadid",
+      "cluster": "Cluster 10",
+      "sheetName": "cluster 10",
+      "rowNumber": 5,
+      "intervention": "Cleaning the water storage reservoirs and repairing damaged pipe due to flood.",
+      "location": "Shaikh Jalal",
+      "level": "High",
+      "lat": null,
+      "lon": null,
+      "hasCoordinates": false
+    },
+    {
+      "region": "Nawabad",
+      "cluster": "Nawabad Cluster",
+      "sheetName": "Sheet1",
+      "rowNumber": 1,
+      "intervention": "Leveling and Graveling the Main Road",
+      "location": "Nawabad Main Road",
+      "level": "High",
+      "lat": null,
+      "lon": null,
+      "hasCoordinates": false
+    },
+    {
+      "region": "Nawabad",
+      "cluster": "Nawabad Cluster",
+      "sheetName": "Sheet1",
+      "rowNumber": 7,
+      "intervention": "Rehabilitation and repair of Nawabad High School",
+      "location": "Nawabad Konjak",
+      "level": "High",
+      "lat": null,
+      "lon": null,
+      "hasCoordinates": false
+    },
+    {
+      "region": "Nawabad",
+      "cluster": "Nawabad Cluster",
+      "sheetName": "Sheet1",
+      "rowNumber": 8,
+      "intervention": "Construction of one side of the boundary wall for Nawabad High School",
+      "location": "Nawabad Konjak",
+      "level": "High",
+      "lat": null,
+      "lon": null,
+      "hasCoordinates": false
+    }
+  ],
+  "extraInMap": []
+}

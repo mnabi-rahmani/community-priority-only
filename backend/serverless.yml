@@ -1,0 +1,76 @@
+# Auth-only API for Community Priorities maps.
+# IMPORTANT: This is a separate service from the legacy community-profile-api stack.
+# Do NOT deploy this over the existing production API at tfqmwiadc8 / vqcvab7nnc
+# unless you intend to replace auth there. Maps currently use the live dev API URL
+# configured in frontend/*/src/config.js and deploy-community-priorities-map-isolated-to-aws.ps1.
+
+service: community-priorities-auth-api
+
+frameworkVersion: "3"
+useDotenv: true
+
+provider:
+  name: aws
+  runtime: nodejs20.x
+  region: us-east-1
+  stage: ${opt:stage, 'dev'}
+  memorySize: 256
+  timeout: 29
+  httpApi:
+    cors:
+      allowedOrigins:
+        - "*"
+      allowedHeaders:
+        - Content-Type
+        - Authorization
+      allowedMethods:
+        - GET
+        - POST
+        - OPTIONS
+  environment:
+    AWS_NODEJS_CONNECTION_REUSE_ENABLED: "1"
+    JWT_SECRET: ${env:JWT_SECRET}
+    JWT_EXPIRES_IN: ${env:JWT_EXPIRES_IN, '24h'}
+
+custom:
+  esbuild:
+    bundle: true
+    minify: false
+    sourcemap: true
+    target: node20
+    define:
+      require.resolve: undefined
+    platform: node
+    concurrency: 10
+
+plugins:
+  - serverless-esbuild
+
+package:
+  individually: true
+
+functions:
+  authLogin:
+    handler: src/handlers/auth-login.handler
+    events:
+      - httpApi:
+          path: /auth/login
+          method: POST
+  authVerify:
+    handler: src/handlers/auth-verify.handler
+    events:
+      - httpApi:
+          path: /auth/verify
+          method: GET
+  authRefresh:
+    handler: src/handlers/auth-refresh.handler
+    events:
+      - httpApi:
+          path: /auth/refresh
+          method: POST
+
+resources:
+  Outputs:
+    ApiUrl:
+      Description: Community Priorities auth API base URL
+      Value: !Sub "https://${HttpApi}.execute-api.${AWS::Region}.amazonaws.com"
