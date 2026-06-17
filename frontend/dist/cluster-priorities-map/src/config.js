@@ -7,12 +7,13 @@ window.COMMUNITY_PRIORITIES_CONFIG = {
   areaPhotosGlobal: "INFRASTRUCTURE_AREA_PHOTOS",
   areaPhotoRadiusMeters: 100,
   mapId: "cluster-priorities-only",
+  enableMapExport: true,
   includedLayerIds: ["boundary_cluster", "boundary_community"],
   navItems: [
     {
       id: "assets-community-priorities",
       label: "Assets and Community Priorities Old",
-      href: "/"
+      href: "/community-priorities-map/map.htm"
     },
     {
       id: "cluster-priorities-only",
@@ -25,7 +26,7 @@ window.COMMUNITY_PRIORITIES_CONFIG = {
       href: "/cluster-priorities-assets-map/map.htm"
     }
   ],
-  priorityPhotoBaseUrl: "https://community-priorities-map-assets-974389254535-us-east-1.s3.us-east-1.amazonaws.com/community-priorities/priority-previews/",
+  priorityPhotoBaseUrl: "",
   authApiBaseUrl: "https://tfqmwiadc8.execute-api.us-east-1.amazonaws.com",
   allowedAuthModules: ["clusters_map", "all"]
 };

@@ -17,6 +17,126 @@
     low: 1
   };
 
+  const DARK_BASEMAPS = new Set([
+    "Satellite imagery",
+    "Satellite + labels"
+  ]);
+
+  const MAP_DECORATION_MARGIN = 14 * LEGEND_SCALE;
+
+  function decorationColor(basemap) {
+    return DARK_BASEMAPS.has(basemap) ? "#ffffff" : "#17201e";
+  }
+
+  function metersPerMapPixel(latitude, zoom) {
+    return 156543.03392 * Math.cos((latitude * Math.PI) / 180) / Math.pow(2, zoom);
+  }
+
+  function pickNiceScaleDistance(maxMeters) {
+    const candidates = [
+      10, 20, 50, 100, 200, 250, 500, 750,
+      1000, 1500, 2000, 2500, 3000, 5000, 7500,
+      10000, 15000, 20000, 25000, 50000, 75000, 100000
+    ];
+    for (let index = candidates.length - 1; index >= 0; index -= 1) {
+      if (candidates[index] <= maxMeters * 0.92) return candidates[index];
+    }
+    return candidates[0];
+  }
+
+  function formatScaleLabel(meters, isLast) {
+    if (meters >= 1000) {
+      const km = meters / 1000;
+      const text = Number.isInteger(km)
+        ? String(km)
+        : km.toFixed(km < 10 ? 2 : 1).replace(/\.?0+$/, "");
+      return isLast ? `${text} Kilometers` : text;
+    }
+    return isLast ? `${meters} Meters` : String(meters);
+  }
+
+  function buildScaleBarSpec(metadata, canvasWidth, captureScale) {
+    const maxBarPx = Math.min(220 * LEGEND_SCALE, canvasWidth * 0.24);
+    const metersPerPx = metersPerMapPixel(metadata.mapScaleLat, metadata.mapZoom) / captureScale;
+    const totalMeters = pickNiceScaleDistance(maxBarPx * metersPerPx);
+    const barWidthPx = totalMeters / metersPerPx;
+    return { totalMeters, barWidthPx, segments: 4 };
+  }
+
+  function legendBlockHeight(items) {
+    if (!items.length) return 0;
+    return LEGEND_PADDING * 2 + LEGEND_HEADER_HEIGHT + items.length * LEGEND_ROW_HEIGHT;
+  }
+
+  function scaleBarBlockHeight() {
+    return 34 * LEGEND_SCALE;
+  }
+
+  function drawNorthArrow(ctx, rightX, topY, color) {
+    const arrowWidth = 24 * LEGEND_SCALE;
+    const arrowHeight = 30 * LEGEND_SCALE;
+    const centerX = rightX - arrowWidth / 2;
+
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.strokeStyle = color;
+    ctx.font = `700 ${Math.round(17 * LEGEND_SCALE)}px Georgia, "Times New Roman", serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillText("N", centerX, topY + 16 * LEGEND_SCALE);
+
+    const tipY = topY + 20 * LEGEND_SCALE;
+    const baseY = tipY + arrowHeight;
+    ctx.beginPath();
+    ctx.moveTo(centerX, tipY);
+    ctx.lineTo(centerX - arrowWidth / 2, baseY);
+    ctx.lineTo(centerX + arrowWidth / 2, baseY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawScaleBar(ctx, leftX, topY, spec, color) {
+    const { totalMeters, barWidthPx, segments } = spec;
+    const lineY = topY + 8 * LEGEND_SCALE;
+    const endTickHeight = 10 * LEGEND_SCALE;
+    const midTickHeight = 6 * LEGEND_SCALE;
+    const labelY = lineY + 14 * LEGEND_SCALE;
+    const fontSize = Math.round(11 * LEGEND_SCALE);
+
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 2;
+    ctx.lineCap = "square";
+
+    ctx.beginPath();
+    ctx.moveTo(leftX, lineY);
+    ctx.lineTo(leftX + barWidthPx, lineY);
+    ctx.stroke();
+
+    for (let index = 0; index <= segments; index += 1) {
+      const tickX = leftX + (barWidthPx / segments) * index;
+      const tickHeight = index === 0 || index === segments ? endTickHeight : midTickHeight;
+      ctx.beginPath();
+      ctx.moveTo(tickX, lineY);
+      ctx.lineTo(tickX, lineY + tickHeight);
+      ctx.stroke();
+    }
+
+    ctx.font = `600 ${fontSize}px Arial, Helvetica, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    for (let index = 0; index <= segments; index += 1) {
+      const tickX = leftX + (barWidthPx / segments) * index;
+      const meters = (totalMeters / segments) * index;
+      const label = formatScaleLabel(meters, index === segments);
+      ctx.fillText(label, tickX, labelY);
+    }
+
+    ctx.restore();
+  }
+
   function slugify(value) {
     return String(value || "all")
       .toLowerCase()
@@ -238,13 +358,11 @@
     ctx.restore();
   }
 
-  function drawArcGisLegend(ctx, mapX, mapY, mapWidth, mapHeight, items) {
+  function drawArcGisLegend(ctx, legendX, legendY, items) {
     if (!items.length) return;
 
     const legendWidth = measureLegendWidth(ctx, items);
-    const legendHeight = LEGEND_PADDING * 2 + LEGEND_HEADER_HEIGHT + items.length * LEGEND_ROW_HEIGHT;
-    const legendX = mapX + mapWidth - legendWidth - 14 * LEGEND_SCALE;
-    const legendY = mapY + mapHeight - legendHeight - 14 * LEGEND_SCALE;
+    const legendHeight = legendBlockHeight(items);
 
     ctx.save();
     ctx.fillStyle = "rgba(255, 255, 255, 0.96)";
@@ -275,13 +393,36 @@
     ctx.restore();
   }
 
-  function compositeMapWithLegend(mapCanvas, legendItems) {
+  function compositeMapWithDecorations(mapCanvas, legendItems, metadata, captureScale) {
     const composite = document.createElement("canvas");
     composite.width = mapCanvas.width;
     composite.height = mapCanvas.height;
     const ctx = composite.getContext("2d");
     ctx.drawImage(mapCanvas, 0, 0);
-    drawArcGisLegend(ctx, 0, 0, composite.width, composite.height, legendItems);
+
+    const color = decorationColor(metadata.basemap);
+    const mapWidth = composite.width;
+    const mapHeight = composite.height;
+    const margin = MAP_DECORATION_MARGIN;
+
+    drawNorthArrow(ctx, mapWidth - margin, margin, color);
+
+    const scaleSpec = buildScaleBarSpec(metadata, mapWidth, captureScale);
+    const scaleHeight = scaleBarBlockHeight();
+    const scaleTop = mapHeight - margin - scaleHeight;
+    const scaleLeft = mapWidth - margin - scaleSpec.barWidthPx;
+    drawScaleBar(ctx, scaleLeft, scaleTop, scaleSpec, color);
+
+    if (legendItems.length) {
+      const legendWidth = measureLegendWidth(ctx, legendItems);
+      const legendHeight = legendBlockHeight(legendItems);
+      const legendGap = 12 * LEGEND_SCALE;
+      const legendBottom = scaleTop - legendGap;
+      const legendY = Math.max(margin, legendBottom - legendHeight);
+      const legendX = mapWidth - margin - legendWidth;
+      drawArcGisLegend(ctx, legendX, legendY, legendItems);
+    }
+
     return composite;
   }
 
@@ -348,11 +489,11 @@
 
   async function buildExportCanvas(map, getMetadata) {
     const metadata = getMetadata();
-    const scale = resolveExportScale(metadata);
+    const captureScale = resolveExportScale(metadata);
     const legendItems = await preloadLegendIcons(metadata.legendItems || []);
-    const mapCanvas = await captureMapCanvas(map, scale);
-    const mapWithLegend = compositeMapWithLegend(mapCanvas, legendItems);
-    return buildFramedCanvas(mapWithLegend, metadata);
+    const mapCanvas = await captureMapCanvas(map, captureScale);
+    const mapWithDecorations = compositeMapWithDecorations(mapCanvas, legendItems, metadata, captureScale);
+    return buildFramedCanvas(mapWithDecorations, metadata);
   }
 
   async function exportPng(map, getMetadata) {

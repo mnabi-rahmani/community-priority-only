@@ -1633,11 +1633,15 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       const titleInput = document.getElementById("exportTitleInput");
       const subtitleInput = document.getElementById("exportSubtitleInput");
       const qualityInput = document.getElementById("exportQualitySelect");
+      const bounds = map.getBounds();
 
       return {
         title: titleInput?.value?.trim() || defaultExportTitle(),
         subtitle: subtitleInput?.value?.trim() || defaultExportSubtitle(),
         quality: qualityInput?.value || "medium",
+        basemap: basemapFilter?.value || DEFAULT_BASE_MAP,
+        mapScaleLat: bounds.getSouth(),
+        mapZoom: map.getZoom(),
         mapSlug: COMMUNITY_PRIORITIES_CONFIG.mapId || defaultExportTitle(),
         legendItems: buildExportLegendItems(),
         cluster,
