@@ -369,7 +369,8 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     const ZOOM_SHOW_FACILITIES = 0;
     const ZOOM_SHOW_COMMUNITY_LABELS = 13;
     const DECLUTTER_GROUP_METERS = 14;
-    const DECLUTTER_SPACING_PX = 30;
+    const DECLUTTER_SPACING_PX = 48;
+    const DUPLICATE_GPS_SPREAD_METERS = 20;
 
     function normalizeCluster(name) {
       if (name === "Naw Abad Cluster") return "Nawabad Cluster";
@@ -429,6 +430,46 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
 
     function markerLatLng(point) {
       return [point.lat + (point.offsetLat || 0), point.lon + (point.offsetLon || 0)];
+    }
+
+    function metersToLonOffset(meters, lat) {
+      return meters / (111320 * Math.cos((lat * Math.PI) / 180));
+    }
+
+    function gpsCoordKey(lat, lon) {
+      return `${Number(lat).toFixed(7)},${Number(lon).toFixed(7)}`;
+    }
+
+    function assignDuplicateGpsSpread(points) {
+      const visibleIds = new Set(points.map((point) => point.id));
+      ALL_PRIORITY_POINTS.forEach((point) => {
+        if (!visibleIds.has(point.id)) {
+          point.offsetLat = 0;
+          point.offsetLon = 0;
+        }
+      });
+
+      const byCoord = new Map();
+      points.forEach((point) => {
+        const key = gpsCoordKey(point.lat, point.lon);
+        if (!byCoord.has(key)) byCoord.set(key, []);
+        byCoord.get(key).push(point);
+      });
+
+      byCoord.forEach((group) => {
+        if (group.length <= 1) {
+          group[0].offsetLat = 0;
+          group[0].offsetLon = 0;
+          return;
+        }
+
+        const centerIndex = (group.length - 1) / 2;
+        group.forEach((point, index) => {
+          const eastMeters = (index - centerIndex) * DUPLICATE_GPS_SPREAD_METERS;
+          point.offsetLat = 0;
+          point.offsetLon = metersToLonOffset(eastMeters, point.lat);
+        });
+      });
     }
 
     function haversineMeters(lat1, lon1, lat2, lon2) {
@@ -560,7 +601,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     function pixelLayout(count) {
       if (count <= 1) return [{ dx: 0, dy: 0 }];
       if (count === 2) {
-        const half = DECLUTTER_SPACING_PX * 0.55;
+        const half = DECLUTTER_SPACING_PX * 0.5;
         return [{ dx: -half, dy: 0 }, { dx: half, dy: 0 }];
       }
       const radius = DECLUTTER_SPACING_PX * 0.85;
@@ -1270,6 +1311,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     }
 
     function renderPriorityMarkers(points) {
+      assignDuplicateGpsSpread(points);
       priorityGroup.clearLayers();
       points.forEach((point) => {
         let marker = markerById.get(point.id);
@@ -1285,7 +1327,8 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
           marker.setIcon(markerIcon(point));
           marker.setPopupContent(popupHtml(point));
         }
-        marker._declutterAnchor = anchorLatLng(point.lat, point.lon);
+        const [spreadLat, spreadLon] = markerLatLng(point);
+        marker._declutterAnchor = anchorLatLng(spreadLat, spreadLon);
         marker._declutterKind = "priority";
         marker.addTo(priorityGroup);
       });
