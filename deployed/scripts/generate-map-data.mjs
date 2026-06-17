@@ -1,5 +1,6 @@
 import crypto from "node:crypto";
-import fs from "node:fs/promises";
+import fs from "node:fs";
+import fsPromises from "node:fs/promises";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 
@@ -16,7 +17,10 @@ import {
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const deployedDir = path.resolve(scriptDir, "..");
-const assetsDir = path.join(deployedDir, "Assets Needed");
+const repoRoot = path.resolve(deployedDir, "..");
+const assetsDir = fs.existsSync(path.join(repoRoot, "Assets Needed"))
+  ? path.join(repoRoot, "Assets Needed")
+  : path.join(deployedDir, "Assets Needed");
 const sourcePhotoRoot = path.join(assetsDir, "Photos of Clusters and Sub-villages");
 const fgdDocsRoot = path.join(assetsDir, "FGDs, CAP Reports & Compiled Needs Priorities");
 const communityPrioritiesRoot = path.join(assetsDir, "Community priorities");
@@ -251,7 +255,7 @@ function extractClusterFromPath(absolutePath) {
 }
 
 async function walkFiles(root) {
-  const entries = await fs.readdir(root, { withFileTypes: true });
+  const entries = await fsPromises.readdir(root, { withFileTypes: true });
   const files = [];
 
   for (const entry of entries) {
@@ -268,7 +272,7 @@ async function walkFiles(root) {
 
 async function walkDocxFiles(root) {
   try {
-    const entries = await fs.readdir(root, { withFileTypes: true });
+    const entries = await fsPromises.readdir(root, { withFileTypes: true });
     const files = [];
     for (const entry of entries) {
       const absolutePath = path.join(root, entry.name);
@@ -479,7 +483,7 @@ function revisePriorityPoint(point, corpus) {
 }
 
 async function hashFile(absolutePath) {
-  const content = await fs.readFile(absolutePath);
+  const content = await fsPromises.readFile(absolutePath);
   return crypto.createHash("sha256").update(content).digest("hex").slice(0, 16);
 }
 
@@ -488,7 +492,7 @@ async function ensurePreview(absolutePath, hash) {
   const outputPath = path.join(previewDir, fileName);
 
   try {
-    await fs.access(outputPath);
+    await fsPromises.access(outputPath);
     return {
       image: `cursor_v2_map_data/photo_previews/${fileName}`,
       previewGenerated: false
@@ -500,7 +504,7 @@ async function ensurePreview(absolutePath, hash) {
   try {
     let source = absolutePath;
     if (path.extname(absolutePath).toLowerCase() === ".heic") {
-      const inputBuffer = await fs.readFile(absolutePath);
+      const inputBuffer = await fsPromises.readFile(absolutePath);
       source = await heicConvert({
         buffer: inputBuffer,
         format: "JPEG",
@@ -680,7 +684,7 @@ window.photoPopupHtml = function photoPopupHtml(photo, title, metaRows) {
     helper.trimStart()
   ].join("\n");
 
-  await fs.writeFile(path.join(dataDir, "photo_index.js"), content, "utf8");
+  await fsPromises.writeFile(path.join(dataDir, "photo_index.js"), content, "utf8");
 }
 
 async function writePriorities(priorityPoints) {
@@ -692,7 +696,7 @@ async function writePriorities(priorityPoints) {
     formatJsAssignment("PHOTO_BACKED_FILTERS", filters)
   ].join("\n");
 
-  await fs.writeFile(path.join(dataDir, "photo_backed_priorities.js"), content, "utf8");
+  await fsPromises.writeFile(path.join(dataDir, "photo_backed_priorities.js"), content, "utf8");
 }
 
 async function writePriorityReviewReport(priorityPoints) {
@@ -713,7 +717,7 @@ async function writePriorityReviewReport(priorityPoints) {
     note: point.note
   }));
 
-  await fs.writeFile(
+  await fsPromises.writeFile(
     path.join(dataDir, "photo_backed_priorities_review.json"),
     JSON.stringify(report, null, 2),
     "utf8"
@@ -721,7 +725,7 @@ async function writePriorityReviewReport(priorityPoints) {
 }
 
 async function main() {
-  await fs.mkdir(previewDir, { recursive: true });
+  await fsPromises.mkdir(previewDir, { recursive: true });
 
   const documentCorpus = await loadDocumentCorpus();
   const sourceFiles = await walkFiles(sourcePhotoRoot);

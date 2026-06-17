@@ -1,7 +1,4 @@
 const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
-    const AUTH_API_BASE_URL = (COMMUNITY_PRIORITIES_CONFIG.authApiBaseUrl || "https://tfqmwiadc8.execute-api.us-east-1.amazonaws.com").replace(/\/$/, "");
-    const AUTH_ALLOWED_MODULES = new Set(COMMUNITY_PRIORITIES_CONFIG.allowedAuthModules || ["clusters_map", "all"]);
-    const AUTH_STORAGE_KEY = "communityPrioritiesAuth";
     const rawPriorityPhotoBaseUrl = String(COMMUNITY_PRIORITIES_CONFIG.priorityPhotoBaseUrl || "").trim();
     const PRIORITY_PHOTO_BASE_URL = rawPriorityPhotoBaseUrl
       ? rawPriorityPhotoBaseUrl.replace(/\/?$/, "/")
@@ -9,145 +6,10 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     const USE_LOCAL_PRIORITY_PHOTOS = ["localhost", "127.0.0.1", ""].includes(window.location.hostname)
       && !["/community-priorities-map/", "/cluster-priorities-map/"].some((path) => window.location.pathname.includes(path));
 
-    const authScreen = document.getElementById("authScreen");
-    const authForm = document.getElementById("authForm");
-    const authUserId = document.getElementById("authUserId");
-    const authPassword = document.getElementById("authPassword");
-    const authSubmit = document.getElementById("authSubmit");
-    const authMessage = document.getElementById("authMessage");
-    const authUserPanel = document.getElementById("authUserPanel");
-    const authUserLabel = document.getElementById("authUserLabel");
-    const authLogout = document.getElementById("authLogout");
-
-    function readStoredAuth() {
-      try {
-        return JSON.parse(window.localStorage.getItem(AUTH_STORAGE_KEY) || "null");
-      } catch {
-        return null;
-      }
-    }
-
-    function storeAuth(authState) {
-      window.localStorage.setItem(AUTH_STORAGE_KEY, JSON.stringify(authState));
-    }
-
-    function clearStoredAuth() {
-      window.localStorage.removeItem(AUTH_STORAGE_KEY);
-    }
-
-    function isAllowedUser(user) {
-      return Boolean(user && AUTH_ALLOWED_MODULES.has(user.module));
-    }
-
-    function showAuthMessage(message) {
-      if (!authMessage) return;
-      authMessage.textContent = message;
-      authMessage.hidden = false;
-    }
-
-    function clearAuthMessage() {
-      if (!authMessage) return;
-      authMessage.textContent = "";
-      authMessage.hidden = true;
-    }
-
-    function showLogin() {
-      if (authScreen) authScreen.hidden = false;
-      if (authUserPanel) authUserPanel.hidden = true;
-      authUserId?.focus();
-    }
-
-    function showAuthenticatedApp(user) {
-      if (authScreen) authScreen.hidden = true;
-      if (authUserPanel) authUserPanel.hidden = false;
-      if (authUserLabel) {
-        const moduleLabel = user.module === "all" ? "All Modules" : "Clusters Map";
-        authUserLabel.textContent = `${user.name || user.userId} (${user.role} - ${moduleLabel})`;
-      }
-    }
-
-    async function authRequest(path, options = {}) {
-      const response = await fetch(`${AUTH_API_BASE_URL}${path}`, {
-        ...options,
-        headers: {
-          "Content-Type": "application/json",
-          ...(options.headers || {})
-        }
-      });
-      const payload = await response.json().catch(() => ({}));
-      if (!response.ok || payload.success === false) {
-        throw new Error(payload.message || "Authentication request failed.");
-      }
-      return payload.data || payload;
-    }
-
-    async function verifyStoredAuth() {
-      const stored = readStoredAuth();
-      if (!stored?.token) {
-        showLogin();
-        return;
-      }
-      try {
-        const data = await authRequest("/auth/verify", {
-          method: "GET",
-          headers: { Authorization: `Bearer ${stored.token}` }
-        });
-        const user = data.user || stored.user;
-        if (!data.valid || !isAllowedUser(user)) {
-          clearStoredAuth();
-          showLogin();
-          return;
-        }
-        showAuthenticatedApp(user);
-      } catch {
-        clearStoredAuth();
-        showLogin();
-      }
-    }
-
-    authForm?.addEventListener("submit", async (event) => {
-      event.preventDefault();
-      clearAuthMessage();
-      const userId = authUserId?.value.trim();
-      const password = authPassword?.value || "";
-      if (!userId || !password) {
-        showAuthMessage("Enter both username and password.");
-        return;
-      }
-      if (authSubmit) {
-        authSubmit.disabled = true;
-        authSubmit.textContent = "Signing in...";
-      }
-      try {
-        const data = await authRequest("/auth/login", {
-          method: "POST",
-          body: JSON.stringify({ userId, password })
-        });
-        if (!isAllowedUser(data.user)) {
-          clearStoredAuth();
-          showAuthMessage("This user is not authorized for the Community Priorities map.");
-          return;
-        }
-        storeAuth({ token: data.token, user: data.user, expiresIn: data.expiresIn });
-        if (authPassword) authPassword.value = "";
-        showAuthenticatedApp(data.user);
-      } catch (error) {
-        clearStoredAuth();
-        showAuthMessage(error.message || "Invalid username or password.");
-      } finally {
-        if (authSubmit) {
-          authSubmit.disabled = false;
-          authSubmit.textContent = "Sign in";
-        }
-      }
+    window.CommunityPrioritiesAuth?.init({
+      authApiBaseUrl: COMMUNITY_PRIORITIES_CONFIG.authApiBaseUrl,
+      allowedAuthModules: COMMUNITY_PRIORITIES_CONFIG.allowedAuthModules || ["clusters_map", "all"]
     });
-
-    authLogout?.addEventListener("click", () => {
-      clearStoredAuth();
-      showLogin();
-    });
-
-    verifyStoredAuth();
 
     function resolveAssetUrl(path) {
       if (!path) return "";
@@ -244,7 +106,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
         layer: createBaseMap(
           "Satellite imagery",
           "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-          { maxZoom: 19, attribution: "Tiles &copy; Esri" }
+          { maxZoom: 19, attribution: "Tiles &copy; Esri", crossOrigin: true }
         )
       },
       {
@@ -254,12 +116,12 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
             createBaseMap(
               "Satellite + labels (imagery)",
               "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",
-              { maxZoom: 19, attribution: "Tiles &copy; Esri" }
+              { maxZoom: 19, attribution: "Tiles &copy; Esri", crossOrigin: true }
             ),
             createBaseMap(
               "Satellite + labels (reference)",
               "https://server.arcgisonline.com/ArcGIS/rest/services/Reference/World_Boundaries_and_Places/MapServer/tile/{z}/{y}/{x}",
-              { maxZoom: 19, attribution: "Labels &copy; Esri", pane: "overlayPane" }
+              { maxZoom: 19, attribution: "Labels &copy; Esri", pane: "overlayPane", crossOrigin: true }
             )
           ]);
           group._baseMapName = "Satellite + labels";
@@ -295,7 +157,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
         layer: createBaseMap(
           "Esri streets",
           "https://server.arcgisonline.com/ArcGIS/rest/services/World_Street_Map/MapServer/tile/{z}/{y}/{x}",
-          { maxZoom: 19, attribution: "Tiles &copy; Esri" }
+          { maxZoom: 19, attribution: "Tiles &copy; Esri", crossOrigin: true }
         )
       }
     ];
@@ -320,7 +182,10 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     const sideHeaderToggle = document.getElementById("sideHeaderToggle");
     const sideIntroPanel = document.getElementById("sideIntroPanel");
     const SIDE_INTRO_STORAGE_KEY = "communityPrioritiesSideIntroCollapsed";
-    const layerControlEntries = { "Photo-backed priorities": priorityGroup };
+    const priorityLayerLabel = IS_INFRASTRUCTURE_DISPLAY
+      ? "Infrastructure priorities"
+      : "Photo-backed priorities";
+    const layerControlEntries = { [priorityLayerLabel]: priorityGroup };
 
     function setSideIntroCollapsed(collapsed) {
       if (!sideIntroPanel || !sideHeaderToggle) return;
@@ -1025,9 +890,24 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
         rebuildDatabaseLayer(entry);
       });
 
+      const controlEntries = (() => {
+        const ordered = {};
+        [
+          "Cluster boundaries",
+          "Community boundaries",
+          priorityLayerLabel
+        ].forEach((label) => {
+          if (layerControlEntries[label]) ordered[label] = layerControlEntries[label];
+        });
+        Object.keys(layerControlEntries).forEach((label) => {
+          if (!ordered[label]) ordered[label] = layerControlEntries[label];
+        });
+        return ordered;
+      })();
+
       layersControl = L.control.layers(
         BASE_MAP_LAYERS,
-        layerControlEntries,
+        controlEntries,
         { collapsed: true }
       ).addTo(map);
 
@@ -1472,6 +1352,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
 
     clusterFilter.addEventListener("change", () => {
       populateVillageFilter();
+      syncExportSubtitleField();
       applyFilters(true);
     });
     villageFilter.addEventListener("change", () => applyFilters(true));
@@ -1616,3 +1497,171 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       if (event.key === "ArrowLeft") stepLightbox(-1);
       if (event.key === "ArrowRight") stepLightbox(1);
     });
+
+    function isLayerRenderedOnMap(store) {
+      if (!store || !map.hasLayer(store.group) || (store.visibleCount || 0) <= 0) {
+        return false;
+      }
+
+      const zoom = map.getZoom();
+      const entry = store.entry;
+
+      if (entry.geometry === "point" && zoom < ZOOM_SHOW_FACILITIES) {
+        return false;
+      }
+
+      if (entry.geometry !== "point") {
+        return true;
+      }
+
+      let hasVisibleMarker = false;
+      store.group.eachLayer((layer) => {
+        if (hasVisibleMarker) return;
+        const element = layer.getElement?.();
+        if (element) {
+          const opacity = Number.parseFloat(element.style.opacity || "1");
+          if (opacity > 0) hasVisibleMarker = true;
+          return;
+        }
+        if ((layer.options?.opacity ?? 1) > 0) {
+          hasVisibleMarker = true;
+        }
+      });
+      return hasVisibleMarker;
+    }
+
+    function isPriorityLayerRenderedOnMap() {
+      if (!map.hasLayer(priorityGroup) || map.getZoom() < ZOOM_SHOW_PRIORITIES) {
+        return false;
+      }
+      return filteredPriorityPoints().length > 0;
+    }
+
+    function buildExportLegendItems() {
+      const items = [];
+
+      if (isPriorityLayerRenderedOnMap()) {
+        items.push({
+          label: priorityLayerLabel,
+          type: "priority",
+          fillColor: "#4a5568",
+          strokeColor: "#ffffff"
+        });
+      }
+
+      databaseManifestEntries().forEach((entry) => {
+        const store = databaseStores.get(entry.id);
+        if (!isLayerRenderedOnMap(store)) return;
+
+        const style = styleForLayer(entry.id);
+        const item = {
+          label: entry.label,
+          type: entry.geometry,
+          strokeColor: style.strokeColor,
+          fillColor: style.fillColor || style.markerFill,
+          strokeWidth: style.strokeWidth || 2,
+          fillOpacity: 0.35,
+          iconUrl: style.icon ? resolveAssetUrl(style.icon) : null
+        };
+
+        if (entry.id === "boundary_cluster") {
+          item.type = "polygon";
+          item.fillColor = style.fillColor || "#e9ffbe";
+          item.strokeColor = style.strokeColor || "#002673";
+          item.fillOpacity = style.fillOpacity ?? 0.35;
+        } else if (entry.id === "boundary_community") {
+          item.type = "polygon";
+          item.fillColor = style.fillColor || "#259070";
+          item.strokeColor = style.strokeColor || "#cccccc";
+          item.fillOpacity = 0;
+        } else if (entry.geometry === "line") {
+          item.type = "line";
+          item.strokeColor = style.strokeColor || "#666666";
+          item.strokeWidth = style.strokeWidth || 2;
+        } else if (entry.geometry === "point") {
+          item.type = style.icon ? "icon" : "point";
+          item.fillColor = style.fillColor || style.markerFill || "#333333";
+          item.strokeColor = style.strokeColor || "#ffffff";
+        }
+
+        items.push(item);
+      });
+
+      return items;
+    }
+
+    function defaultExportTitle() {
+      return document.querySelector(".side-header h1")?.textContent?.trim()
+        || document.title
+        || "Community Priorities Map";
+    }
+
+    function defaultExportSubtitle() {
+      const cluster = clusterFilter?.value || "All";
+      return cluster === "All" ? "All clusters" : cluster;
+    }
+
+    function syncExportSubtitleField() {
+      const subtitleInput = document.getElementById("exportSubtitleInput");
+      if (!subtitleInput || subtitleInput.dataset.userEdited === "true") return;
+      subtitleInput.value = defaultExportSubtitle();
+    }
+
+    function prepareExportPanel() {
+      const titleInput = document.getElementById("exportTitleInput");
+      const subtitleInput = document.getElementById("exportSubtitleInput");
+      if (titleInput && !titleInput.value) {
+        titleInput.value = defaultExportTitle();
+      }
+      if (subtitleInput && subtitleInput.dataset.userEdited !== "true") {
+        subtitleInput.value = defaultExportSubtitle();
+      }
+    }
+
+    function initExportFields() {
+      const exportPill = document.getElementById("mapExportPill");
+      const subtitleInput = document.getElementById("exportSubtitleInput");
+      if (exportPill) exportPill.hidden = false;
+      subtitleInput?.addEventListener("input", () => {
+        subtitleInput.dataset.userEdited = "true";
+      });
+    }
+
+    function buildExportMetadata() {
+      const cluster = clusterFilter?.value || "All";
+      const village = villageFilter?.value || "All";
+      const titleInput = document.getElementById("exportTitleInput");
+      const subtitleInput = document.getElementById("exportSubtitleInput");
+      const qualityInput = document.getElementById("exportQualitySelect");
+
+      return {
+        title: titleInput?.value?.trim() || defaultExportTitle(),
+        subtitle: subtitleInput?.value?.trim() || defaultExportSubtitle(),
+        quality: qualityInput?.value || "medium",
+        mapSlug: COMMUNITY_PRIORITIES_CONFIG.mapId || defaultExportTitle(),
+        legendItems: buildExportLegendItems(),
+        cluster,
+        village,
+        attribution: "Map data © OpenStreetMap contributors, Esri, CARTO, HOT | Community Priorities",
+        exportedAt: `Exported ${formatExportDateForDisplay()}`
+      };
+    }
+
+    function formatExportDateForDisplay() {
+      return new Date().toLocaleString(undefined, {
+        year: "numeric",
+        month: "short",
+        day: "numeric",
+        hour: "2-digit",
+        minute: "2-digit"
+      });
+    }
+
+    if (COMMUNITY_PRIORITIES_CONFIG.enableMapExport && window.CommunityPrioritiesMapExport) {
+      initExportFields();
+      window.CommunityPrioritiesMapExport.bindExportUI(map, buildExportMetadata, {
+        onPreparePanel: prepareExportPanel
+      });
+    }
+
+    window.communityPrioritiesMap = map;

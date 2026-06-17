@@ -35,7 +35,10 @@ foreach ($file in $requiredSourceFiles) {
 
 $requiredSharedFiles = @(
     "src\app.js",
-    "src\styles.css"
+    "src\auth.js",
+    "src\auth-bootstrap.js",
+    "src\styles.css",
+    "src\map-export.js"
 )
 
 foreach ($file in $requiredSharedFiles) {
@@ -79,7 +82,10 @@ Copy-Item $sourceIndex (Join-Path $TargetDir "index.html") -Force
 Copy-Item $sourceIndex (Join-Path $TargetDir "map.htm") -Force
 Copy-Item (Join-Path $SourceDir "src\config.js") (Join-Path $TargetDir "src\config.js") -Force
 Copy-Item (Join-Path $SharedSourceDir "src\app.js") (Join-Path $TargetDir "src\app.js") -Force
+Copy-Item (Join-Path $SharedSourceDir "src\auth.js") (Join-Path $TargetDir "src\auth.js") -Force
+Copy-Item (Join-Path $SharedSourceDir "src\auth-bootstrap.js") (Join-Path $TargetDir "src\auth-bootstrap.js") -Force
 Copy-Item (Join-Path $SharedSourceDir "src\styles.css") (Join-Path $TargetDir "src\styles.css") -Force
+Copy-Item (Join-Path $SharedSourceDir "src\map-export.js") (Join-Path $TargetDir "src\map-export.js") -Force
 
 $targetDataDir = Join-Path $TargetDir "cursor_v2_map_data"
 

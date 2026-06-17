@@ -86,6 +86,14 @@
       display: none;
     }
 
+    html.cp-auth-known #authScreen {
+      display: none !important;
+    }
+
+    html.cp-auth-known #authUserPanel {
+      display: flex !important;
+    }
+
     .auth-card {
       width: min(100%, 420px);
       padding: 28px;
@@ -415,6 +423,156 @@
       margin-top: 4px;
       color: var(--muted);
       font-size: 0.82rem;
+    }
+
+    .map-export-pill {
+      position: fixed;
+      left: 18px;
+      bottom: 18px;
+      z-index: 1100;
+      display: grid;
+      gap: 0;
+      width: auto;
+      padding: 0;
+      border: 1px solid rgba(216, 223, 218, 0.95);
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.96);
+      box-shadow: 0 12px 32px rgba(22, 32, 30, 0.18);
+      backdrop-filter: blur(8px);
+      overflow: hidden;
+    }
+
+    .map-export-pill.map-export-expanded {
+      width: min(300px, calc(100vw - 36px));
+      border-radius: 20px;
+      gap: 10px;
+      padding: 12px;
+    }
+
+    .map-export-pill[hidden] {
+      display: none !important;
+    }
+
+    .map-export-toggle {
+      min-height: 42px;
+      padding: 0 20px;
+      border: 0;
+      border-radius: 999px;
+      background: linear-gradient(180deg, #3a9588 0%, #2f7d72 100%);
+      color: #ffffff;
+      font: inherit;
+      font-size: 0.88rem;
+      font-weight: 800;
+      cursor: pointer;
+      white-space: nowrap;
+    }
+
+    .map-export-expanded .map-export-toggle {
+      width: 100%;
+      border-radius: 12px;
+    }
+
+    .map-export-toggle:hover:not(:disabled) {
+      filter: brightness(1.03);
+    }
+
+    .map-export-toggle:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .map-export-panel {
+      display: grid;
+      gap: 8px;
+    }
+
+    .map-export-panel[hidden] {
+      display: none !important;
+    }
+
+    .map-export-field {
+      display: grid;
+      gap: 4px;
+    }
+
+    .map-export-field span {
+      color: var(--muted);
+      font-size: 0.68rem;
+      font-weight: 800;
+      letter-spacing: 0.04em;
+      text-transform: uppercase;
+    }
+
+    .map-export-field input,
+    .map-export-field select {
+      width: 100%;
+      min-height: 34px;
+      padding: 6px 12px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      color: var(--ink);
+      background: #ffffff;
+      font: inherit;
+      font-size: 0.82rem;
+      font-weight: 600;
+    }
+
+    .map-export-field input:focus,
+    .map-export-field select:focus {
+      outline: 2px solid rgba(47, 125, 114, 0.2);
+      border-color: var(--flood);
+    }
+
+    .map-export-pill-actions {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 8px;
+    }
+
+    .map-export-btn {
+      min-height: 36px;
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      background: #ffffff;
+      color: var(--ink);
+      font: inherit;
+      font-size: 0.8rem;
+      font-weight: 800;
+      cursor: pointer;
+      transition: border-color 0.15s ease, box-shadow 0.15s ease;
+    }
+
+    .map-export-btn:hover:not(:disabled) {
+      border-color: #b7c3be;
+      box-shadow: 0 6px 14px rgba(22, 32, 30, 0.08);
+    }
+
+    .map-export-btn:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    .map-export-btn-primary {
+      border-color: #2f7d72;
+      background: linear-gradient(180deg, #3a9588 0%, #2f7d72 100%);
+      color: #ffffff;
+    }
+
+    .map-export-status {
+      margin: 0;
+      padding: 0 4px;
+      color: var(--muted);
+      font-size: 0.72rem;
+      font-weight: 700;
+      text-align: center;
+    }
+
+    .map-export-status.export-status-error {
+      color: #b42318;
+    }
+
+    .map-export-status[hidden] {
+      display: none;
     }
 
     .cards {

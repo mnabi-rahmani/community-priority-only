@@ -1,0 +1,35 @@
+{
+  "gdb": "C:\\Everything\\Documents\\Projects\\Community Priorities Only\\Assets Needed\\Integrated Locations Database.gdb",
+  "feature_class": "C:\\Everything\\Documents\\Projects\\Community Priorities Only\\Assets Needed\\Integrated Locations Database.gdb\\Facilities\\BoundaryCluster",
+  "backup_fc": "C:\\Everything\\Documents\\Projects\\Community Priorities Only\\backups\\boundary-edit-20260618-032134\\BoundaryCluster_backup.gdb\\BoundaryCluster",
+  "backup_dir": "C:\\Everything\\Documents\\Projects\\Community Priorities Only\\backups\\boundary-edit-20260618-032134",
+  "results": [
+    {
+      "cluster": "Cluster 7",
+      "objectid": 29,
+      "action": "expanded",
+      "buffer_meters": 350,
+      "label": "priority #1 water supply",
+      "lon": 68.8676,
+      "lat": 36.3058
+    },
+    {
+      "cluster": "Cluster 5",
+      "objectid": 30,
+      "action": "expanded",
+      "buffer_meters": 350,
+      "label": "priority #5 sub-health center",
+      "lon": 68.794767,
+      "lat": 36.190527
+    },
+    {
+      "cluster": "Cluster 1",
+      "objectid": 37,
+      "action": "expanded",
+      "buffer_meters": 350,
+      "label": "priority #7 bridge",
+      "lon": 68.768552,
+      "lat": 36.168264
+    }
+  ]
+}

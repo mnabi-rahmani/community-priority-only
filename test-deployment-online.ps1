@@ -43,7 +43,8 @@ try {
 $mapPaths = @(
     @{ Path = "/"; Label = "community map root" },
     @{ Path = "/map.htm"; Label = "community map.htm" },
-    @{ Path = "/cluster-priorities-map/map.htm"; Label = "cluster priorities map" }
+    @{ Path = "/cluster-priorities-map/map.htm"; Label = "cluster priorities map" },
+    @{ Path = "/cluster-priorities-assets-map/map.htm"; Label = "cluster priorities and assets map" }
 )
 
 foreach ($entry in $mapPaths) {
@@ -60,7 +61,7 @@ foreach ($entry in $mapPaths) {
     }
 }
 
-foreach ($configPath in @("/src/config.js", "/cluster-priorities-map/src/config.js")) {
+foreach ($configPath in @("/src/config.js", "/cluster-priorities-map/src/config.js", "/cluster-priorities-assets-map/src/config.js")) {
     $configUrl = "$isolatedBase$configPath"
     try {
         $configResponse = Invoke-WebRequest -Uri $configUrl -UseBasicParsing -TimeoutSec 30

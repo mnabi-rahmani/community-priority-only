@@ -7,6 +7,7 @@ window.COMMUNITY_PRIORITIES_CONFIG = {
   areaPhotosGlobal: "INFRASTRUCTURE_AREA_PHOTOS",
   areaPhotoRadiusMeters: 100,
   mapId: "cluster-priorities-only",
+  enableMapExport: true,
   includedLayerIds: ["boundary_cluster", "boundary_community"],
   navItems: [
     {
@@ -18,6 +19,11 @@ window.COMMUNITY_PRIORITIES_CONFIG = {
       id: "cluster-priorities-only",
       label: "Cluster Priorities Only",
       href: "/cluster-priorities-map/map.htm"
+    },
+    {
+      id: "cluster-priorities-and-assets",
+      label: "Cluster Priorities and Assets",
+      href: "/cluster-priorities-assets-map/map.htm"
     }
   ],
   priorityPhotoBaseUrl: "",

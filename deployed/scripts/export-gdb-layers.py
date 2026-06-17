@@ -8,7 +8,15 @@ import arcpy
 
 
 DEPLOYED_DIR = Path(__file__).resolve().parents[1]
-ASSETS_DIR = DEPLOYED_DIR / "Assets Needed"
+REPO_ROOT = DEPLOYED_DIR.parent
+ASSETS_CANDIDATES = [
+    REPO_ROOT / "Assets Needed",
+    DEPLOYED_DIR / "Assets Needed",
+]
+ASSETS_DIR = next(
+    (candidate for candidate in ASSETS_CANDIDATES if (candidate / "Integrated Locations Database.gdb").exists()),
+    ASSETS_CANDIDATES[0],
+)
 DATA_DIR = DEPLOYED_DIR / "cursor_v2_map_data"
 ICON_DIR = DATA_DIR / "icons"
 GDB_PATH = ASSETS_DIR / "Integrated Locations Database.gdb"

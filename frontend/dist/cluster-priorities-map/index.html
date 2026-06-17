@@ -6,6 +6,7 @@
   <title>Cluster Priorities Only</title>
   <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css">
   <link rel="stylesheet" href="src/styles.css">
+  <script src="src/auth-bootstrap.js"></script>
 </head>
 <body>
   <section id="authScreen" class="auth-screen" aria-label="Sign in to Community Priorities">
@@ -30,6 +31,35 @@
   <nav class="map-nav" id="mapNav" aria-label="Map views"></nav>
 
   <div id="map" aria-label="Cluster Priorities Only interactive map"></div>
+
+  <div id="mapExportPill" class="map-export-pill" data-export-ui hidden>
+    <button type="button" id="exportToggleBtn" class="map-export-toggle" aria-expanded="false" aria-controls="mapExportPanel">
+      Export
+    </button>
+    <div id="mapExportPanel" class="map-export-panel" hidden>
+      <label class="map-export-field">
+        <span>Title</span>
+        <input id="exportTitleInput" type="text" autocomplete="off">
+      </label>
+      <label class="map-export-field">
+        <span>Subtitle</span>
+        <input id="exportSubtitleInput" type="text" autocomplete="off">
+      </label>
+      <label class="map-export-field">
+        <span>Quality</span>
+        <select id="exportQualitySelect">
+          <option value="high">High</option>
+          <option value="medium" selected>Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </label>
+      <div class="map-export-pill-actions">
+        <button type="button" id="exportPngBtn" class="map-export-btn map-export-btn-primary" aria-busy="false">Export PNG</button>
+        <button type="button" id="exportPdfBtn" class="map-export-btn" aria-busy="false">Export PDF</button>
+      </div>
+      <p class="map-export-status" id="exportStatus" hidden></p>
+    </div>
+  </div>
 
   <aside class="side">
     <div class="side-header-controls">
@@ -100,7 +130,11 @@
   <script src="cursor_v2_map_data/layers_bundle.js"></script>
   <script src="cursor_v2_map_data/photo_index.js"></script>
   <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js" crossorigin="anonymous"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js" crossorigin="anonymous"></script>
   <script src="src/config.js"></script>
+  <script src="src/auth.js"></script>
+  <script src="src/map-export.js"></script>
   <script src="src/app.js"></script>
 </body>
 </html>

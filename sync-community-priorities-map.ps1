@@ -16,6 +16,8 @@ if (!(Test-Path $SourceDir)) {
 $requiredSourceFiles = @(
     "index.html",
     "src\app.js",
+    "src\auth.js",
+    "src\auth-bootstrap.js",
     "src\config.js",
     "src\styles.css"
 )

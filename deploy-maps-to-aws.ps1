@@ -70,6 +70,10 @@ Run-Step "Package cluster priorities map" {
     & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "sync-cluster-priorities-map.ps1")
 }
 
+Run-Step "Package cluster priorities and assets map" {
+    & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "sync-cluster-priorities-assets-map.ps1")
+}
+
 if (-not $SkipImageSync) {
     Run-Step "Sync priority map images to S3" {
         & powershell -NoProfile -ExecutionPolicy Bypass -File (Join-Path $PSScriptRoot "sync-priority-map-images-to-s3.ps1") -Region $Region
@@ -100,3 +104,4 @@ Write-Host ""
 Write-Host "Maps deployment completed."
 Write-Host "Community map: $IsolatedMapUrl/"
 Write-Host "Cluster map  : $IsolatedMapUrl/cluster-priorities-map/map.htm"
+Write-Host "Cluster + assets: $IsolatedMapUrl/cluster-priorities-assets-map/map.htm"
