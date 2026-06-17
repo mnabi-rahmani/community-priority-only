@@ -5,8 +5,13 @@
   "scripts": {
     "generate:data": "node scripts/generate-map-data.mjs",
     "generate:infrastructure": "node scripts/generate-infrastructure-priorities.mjs",
+    "fix:infrastructure-gps": "node scripts/apply-infrastructure-gps-fixes.mjs",
+    "fix:v3-v2-gps": "node scripts/fix-v3-v2-spreadsheet-gps.mjs",
+    "verify:v3-v2-map": "node scripts/verify-v3-v2-map-import.mjs",
+    "audit:infrastructure-mapping": "node scripts/audit-infrastructure-mapping.mjs",
     "audit:photo-orphans": "node scripts/audit-photo-orphans.mjs",
     "audit:infrastructure-photos": "node scripts/audit-infrastructure-priority-photos.mjs",
+    "export:infrastructure-comparison": "node scripts/export-infrastructure-map-comparison.mjs",
     "generate:layers": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"& 'C:\\Program Files\\ArcGIS\\Pro\\bin\\Python\\Scripts\\propy.bat' scripts/export-gdb-layers.py\"",
     "dev": "serve . -l 5174",
     "preview": "serve . -l 5174"

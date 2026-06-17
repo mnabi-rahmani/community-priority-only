@@ -13,24 +13,20 @@ import {
   deduplicateRecordsByHash,
   removeOrphanPreviewFiles
 } from "./photo-asset-utils.mjs";
+import { allAssetsRoot, infrastructureAssetsRoot } from "./infrastructure-assets-path.mjs";
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const deployedDir = path.resolve(scriptDir, "..");
-const allAssetsRoot = path.join(deployedDir, "Assets Needed");
-const infrastructureAssetsRoot = path.join(
-  allAssetsRoot,
-  "Infrastructure list for priority mapping"
-);
 const dataDir = path.join(deployedDir, "cursor_v2_map_data");
 const previewDir = path.join(dataDir, "infrastructure_photo_previews");
 
 const excelFiles = [
   {
-    fileName: "Baghlan Infrastructure Priorities.xlsx",
+    fileName: "Baghlan Infrastructure Priorities v3.xlsx",
     region: "Baghlan-e-Jadid"
   },
   {
-    fileName: "Nawabad Infrastructure Priorities.xlsx",
+    fileName: "Nawabad Infrastructure Priorities v2.xlsx",
     region: "Nawabad",
     defaultCluster: "Nawabad Cluster"
   }
@@ -53,6 +49,28 @@ function parseCoordinate(value) {
   if (typeof value === "number" && Number.isFinite(value)) return value;
   const text = compactWhitespace(value);
   if (!text) return null;
+
+  const embeddedPair = text.match(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
+  if (embeddedPair) return Number(embeddedPair[1]);
+
+  if (!/^-?\d+(?:\.\d+)?$/.test(text)) return null;
+  const parsed = Number(text);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function parseLongitude(value, latitudeValue) {
+  if (typeof value === "number" && Number.isFinite(value)) return value;
+  const text = compactWhitespace(value);
+  if (!text) {
+    const latText = compactWhitespace(latitudeValue);
+    const embeddedPair = latText.match(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
+    if (embeddedPair) return Number(embeddedPair[2]);
+    return null;
+  }
+
+  const embeddedPair = text.match(/(-?\d+(?:\.\d+)?)\s*,\s*(-?\d+(?:\.\d+)?)/);
+  if (embeddedPair) return Number(embeddedPair[2]);
+
   if (!/^-?\d+(?:\.\d+)?$/.test(text)) return null;
   const parsed = Number(text);
   return Number.isFinite(parsed) ? parsed : null;
@@ -352,7 +370,7 @@ function readPriorityRows() {
           location,
           level: normalizePriorityLevel(row["Priority level"]),
           lat: parseCoordinate(row.Latitude),
-          lon: parseCoordinate(row.Longitude),
+          lon: parseLongitude(row.Longitude, row.Latitude),
           sheetName,
           rowNumber: row.NO
         });

@@ -142,12 +142,12 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "id": 6,
     "priorityNumber": 6,
     "cluster": "Cluster 1",
-    "intervention": "Road construction/asphalting (Community Leader)",
+    "intervention": "Road construction/asphalting",
     "location": "Laghaei Ha (school road 600m)",
     "level": "Medium",
     "lat": 36.1757278,
     "lon": 68.7678338,
-    "title": "Road construction/asphalting (Community Leader)",
+    "title": "Road construction/asphalting",
     "village": "Laghaei Ha (school road 600m)",
     "markerClass": "infrastructure",
     "image": "",
@@ -352,6 +352,55 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
+    "id": 15,
+    "priorityNumber": 5,
+    "cluster": "Cluster 2",
+    "intervention": "Leveling and graveling of road",
+    "location": "Territorial road in Mula Toor sub-village",
+    "level": "High",
+    "lat": 36.1885,
+    "lon": 68.7724,
+    "title": "Leveling and graveling of road",
+    "village": "Territorial road in Mula Toor sub-village",
+    "markerClass": "infrastructure",
+    "image": "cursor_v2_map_data/infrastructure_photo_previews/5f268158164089bd.jpg",
+    "file": "Water Well, Mulla Toor.HEIC",
+    "photoCount": 2,
+    "photos": [
+      {
+        "image": "cursor_v2_map_data/infrastructure_photo_previews/5f268158164089bd.jpg",
+        "file": "Water Well, Mulla Toor.HEIC",
+        "lat": 36.18838056,
+        "lon": 68.77262222,
+        "distanceMeters": 23.96
+      },
+      {
+        "image": "cursor_v2_map_data/infrastructure_photo_previews/72a2f99644781ae4.jpg",
+        "file": "Shop, Mulla Toor.HEIC",
+        "lat": 36.18803889,
+        "lon": 68.77205,
+        "distanceMeters": 60.13
+      }
+    ]
+  },
+  {
+    "id": 16,
+    "priorityNumber": 6,
+    "cluster": "Cluster 2",
+    "intervention": "Re leveling and graveling of road",
+    "location": "Main circular road of all five sub-villages",
+    "level": "High",
+    "lat": 36.1897562,
+    "lon": 68.7598603,
+    "title": "Re leveling and graveling of road",
+    "village": "Main circular road of all five sub-villages",
+    "markerClass": "infrastructure",
+    "image": "",
+    "file": "",
+    "photoCount": 0,
+    "photos": []
+  },
+  {
     "id": 17,
     "priorityNumber": 7,
     "cluster": "Cluster 2",
@@ -474,6 +523,40 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "id": 21,
     "priorityNumber": 2,
     "cluster": "Cluster 3",
+    "intervention": "Construct protection walls",
+    "location": "Gudan Payen along the main river – called Ajmir with total 300 m length in two different points",
+    "level": "High",
+    "lat": 36.205,
+    "lon": 68.7625,
+    "title": "Construct protection walls",
+    "village": "Gudan Payen along the main river – called Ajmir with total 300 m length in two different points",
+    "markerClass": "infrastructure",
+    "image": "",
+    "file": "",
+    "photoCount": 0,
+    "photos": []
+  },
+  {
+    "id": 22,
+    "priorityNumber": 3,
+    "cluster": "Cluster 3",
+    "intervention": "Construct protection walls",
+    "location": "",
+    "level": "High",
+    "lat": 36.2102,
+    "lon": 68.7664,
+    "title": "Construct protection walls",
+    "village": "",
+    "markerClass": "infrastructure",
+    "image": "",
+    "file": "",
+    "photoCount": 0,
+    "photos": []
+  },
+  {
+    "id": 23,
+    "priorityNumber": 4,
+    "cluster": "Cluster 3",
     "intervention": "Road releveling and graveling",
     "location": "Godan Paein: Godan Paien main street around 1.5 KM",
     "level": "High",
@@ -488,15 +571,32 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 22,
-    "priorityNumber": 3,
+    "id": 24,
+    "priorityNumber": 5,
     "cluster": "Cluster 3",
-    "intervention": "Construction of Agricultural Canal (male FGD)",
+    "intervention": "Road releveling and graveling",
+    "location": "Godan Bala: main/ central street with 1 KM distance",
+    "level": "High",
+    "lat": 36.1989145,
+    "lon": 68.7582106,
+    "title": "Road releveling and graveling",
+    "village": "Godan Bala: main/ central street with 1 KM distance",
+    "markerClass": "infrastructure",
+    "image": "",
+    "file": "",
+    "photoCount": 0,
+    "photos": []
+  },
+  {
+    "id": 25,
+    "priorityNumber": 6,
+    "cluster": "Cluster 3",
+    "intervention": "Construction of Agricultural Canal",
     "location": "Chayabi Ha: Chayei Ha main canal, 3 critical areas that are prone to flood issues and water leakage 300 m distance",
     "level": "High",
     "lat": 36.1970271,
     "lon": 68.7658496,
-    "title": "Construction of Agricultural Canal (male FGD)",
+    "title": "Construction of Agricultural Canal",
     "village": "Chayabi Ha: Chayei Ha main canal, 3 critical areas that are prone to flood issues and water leakage 300 m distance",
     "markerClass": "infrastructure",
     "image": "cursor_v2_map_data/infrastructure_photo_previews/578b0d84d5410617.jpg",
@@ -513,15 +613,15 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 23,
-    "priorityNumber": 4,
+    "id": 26,
+    "priorityNumber": 7,
     "cluster": "Cluster 3",
-    "intervention": "Construction of Agricultural Canal (male FGD)",
+    "intervention": "Construction of Agricultural Canal",
     "location": "Godan Paein: Joye Jarib sha with 1km distance",
     "level": "High",
     "lat": 36.2054595,
     "lon": 68.762116,
-    "title": "Construction of Agricultural Canal (male FGD)",
+    "title": "Construction of Agricultural Canal",
     "village": "Godan Paein: Joye Jarib sha with 1km distance",
     "markerClass": "infrastructure",
     "image": "",
@@ -530,8 +630,8 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 24,
-    "priorityNumber": 5,
+    "id": 27,
+    "priorityNumber": 8,
     "cluster": "Cluster 3",
     "intervention": "Solar-powerd Water Supply Network",
     "location": "Gudan Payen",
@@ -547,8 +647,42 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 25,
-    "priorityNumber": 7,
+    "id": 28,
+    "priorityNumber": 9,
+    "cluster": "Cluster 3",
+    "intervention": "Solar-powerd Water Supply Network",
+    "location": "Gudan Bala",
+    "level": "High",
+    "lat": 36.1983981,
+    "lon": 68.7569247,
+    "title": "Solar-powerd Water Supply Network",
+    "village": "Gudan Bala",
+    "markerClass": "infrastructure",
+    "image": "",
+    "file": "",
+    "photoCount": 0,
+    "photos": []
+  },
+  {
+    "id": 29,
+    "priorityNumber": 10,
+    "cluster": "Cluster 3",
+    "intervention": "Solar-powerd Water Supply Network",
+    "location": "Chayabi Ha",
+    "level": "High",
+    "lat": 36.1967358,
+    "lon": 68.7670957,
+    "title": "Solar-powerd Water Supply Network",
+    "village": "Chayabi Ha",
+    "markerClass": "infrastructure",
+    "image": "",
+    "file": "",
+    "photoCount": 0,
+    "photos": []
+  },
+  {
+    "id": 30,
+    "priorityNumber": 11,
     "cluster": "Cluster 3",
     "intervention": "Construction of school building - secondary level",
     "location": "Godan Paein: Although there is a school building, children study in open areas or under tents (male FGD).",
@@ -572,8 +706,8 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 26,
-    "priorityNumber": 8,
+    "id": 31,
+    "priorityNumber": 12,
     "cluster": "Cluster 3",
     "intervention": "Establishment of Electricity power",
     "location": "Gudan Payen",
@@ -589,8 +723,8 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 27,
-    "priorityNumber": 9,
+    "id": 32,
+    "priorityNumber": 13,
     "cluster": "Cluster 3",
     "intervention": "Construct a basic multi purpose community hall (meeting room, storage, sanitation block).",
     "location": "At the center of all three sub-villages accessible for all",
@@ -606,7 +740,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 28,
+    "id": 33,
     "priorityNumber": 1,
     "cluster": "Cluster 4",
     "intervention": "Water supply System",
@@ -659,7 +793,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 29,
+    "id": 34,
     "priorityNumber": 2,
     "cluster": "Cluster 4",
     "intervention": "Solar-powerd Water Supply Network 1",
@@ -684,7 +818,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 30,
+    "id": 35,
     "priorityNumber": 3,
     "cluster": "Cluster 4",
     "intervention": "Solar-powerd Water Supply Network 2",
@@ -701,7 +835,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 31,
+    "id": 36,
     "priorityNumber": 4,
     "cluster": "Cluster 4",
     "intervention": "Construction of protection wall",
@@ -718,7 +852,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 32,
+    "id": 37,
     "priorityNumber": 5,
     "cluster": "Cluster 4",
     "intervention": "Expansion of school infrastructure and construction new classes",
@@ -771,7 +905,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 33,
+    "id": 38,
     "priorityNumber": 6,
     "cluster": "Cluster 4",
     "intervention": "Establishment of a sub-health center",
@@ -788,7 +922,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 34,
+    "id": 39,
     "priorityNumber": 7,
     "cluster": "Cluster 4",
     "intervention": "Construct a basic multi purpose community hall (meeting room, storage, sanitation block).",
@@ -820,24 +954,32 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 35,
+    "id": 40,
     "priorityNumber": 8,
     "cluster": "Cluster 4",
-    "intervention": "Leveling and graveling",
+    "intervention": "Leveling and graveling Road",
     "location": "Main road of both sub-villages",
     "level": "High",
     "lat": 36.2117116,
-    "lon": 36.2117116,
-    "title": "Leveling and graveling",
+    "lon": 68.77661111,
+    "title": "Leveling and graveling Road",
     "village": "Main road of both sub-villages",
     "markerClass": "infrastructure",
-    "image": "",
-    "file": "",
-    "photoCount": 0,
-    "photos": []
+    "image": "cursor_v2_map_data/infrastructure_photo_previews/e85cd8cfbb3543ff.jpg",
+    "file": "Start point of CL4 and Malem Akbar Village.HEIC",
+    "photoCount": 1,
+    "photos": [
+      {
+        "image": "cursor_v2_map_data/infrastructure_photo_previews/e85cd8cfbb3543ff.jpg",
+        "file": "Start point of CL4 and Malem Akbar Village.HEIC",
+        "lat": 36.21216667,
+        "lon": 68.77661111,
+        "distanceMeters": 50.6
+      }
+    ]
   },
   {
-    "id": 36,
+    "id": 41,
     "priorityNumber": 1,
     "cluster": "Cluster 5",
     "intervention": "New Water Supply System",
@@ -854,7 +996,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 37,
+    "id": 42,
     "priorityNumber": 2,
     "cluster": "Cluster 5",
     "intervention": "Solar-powerd Water Supply Network",
@@ -879,7 +1021,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 38,
+    "id": 43,
     "priorityNumber": 3,
     "cluster": "Cluster 5",
     "intervention": "Constuction of protection wall to prevent flood",
@@ -925,7 +1067,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 39,
+    "id": 44,
     "priorityNumber": 4,
     "cluster": "Cluster 5",
     "intervention": "Construction of school buildings",
@@ -942,7 +1084,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 40,
+    "id": 45,
     "priorityNumber": 5,
     "cluster": "Cluster 5",
     "intervention": "Establishment of a sub-health center",
@@ -974,7 +1116,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 41,
+    "id": 46,
     "priorityNumber": 6,
     "cluster": "Cluster 5",
     "intervention": "Construct a basic multi purpose community hall (meeting room, storage, sanitation block).",
@@ -999,7 +1141,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 42,
+    "id": 47,
     "priorityNumber": 1,
     "cluster": "Cluster 6",
     "intervention": "Solar-powerd Water Supply Network",
@@ -1016,7 +1158,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 43,
+    "id": 48,
     "priorityNumber": 2,
     "cluster": "Cluster 6",
     "intervention": "Water network extension",
@@ -1041,7 +1183,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 44,
+    "id": 49,
     "priorityNumber": 3,
     "cluster": "Cluster 6",
     "intervention": "Establishment of a sub-health center",
@@ -1073,7 +1215,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 45,
+    "id": 50,
     "priorityNumber": 4,
     "cluster": "Cluster 6",
     "intervention": "Leveling and graveling",
@@ -1098,7 +1240,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 46,
+    "id": 51,
     "priorityNumber": 5,
     "cluster": "Cluster 6",
     "intervention": "Alternative shortcut road Leveling and graveling",
@@ -1115,7 +1257,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 47,
+    "id": 52,
     "priorityNumber": 1,
     "cluster": "Cluster 7",
     "intervention": "Solar-powerd Water Supply Networks",
@@ -1132,8 +1274,57 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 48,
+    "id": 53,
     "priorityNumber": 2,
+    "cluster": "Cluster 7",
+    "intervention": "Solar-powerd Water Supply Networks",
+    "location": "Mughol Ha",
+    "level": "Medium",
+    "lat": 36.3343075,
+    "lon": 68.8409854,
+    "title": "Solar-powerd Water Supply Networks",
+    "village": "Mughol Ha",
+    "markerClass": "infrastructure",
+    "image": "",
+    "file": "",
+    "photoCount": 0,
+    "photos": []
+  },
+  {
+    "id": 54,
+    "priorityNumber": 3,
+    "cluster": "Cluster 7",
+    "intervention": "Solar-powerd Water Supply Networks",
+    "location": "Tahiri Ha",
+    "level": "Medium",
+    "lat": 36.3095508,
+    "lon": 68.8354182,
+    "title": "Solar-powerd Water Supply Networks",
+    "village": "Tahiri Ha",
+    "markerClass": "infrastructure",
+    "image": "cursor_v2_map_data/infrastructure_photo_previews/85cdee26c1fa3d43.jpg",
+    "file": "Abu Bakr Sediq Grand Mosque, Taheryan.HEIC",
+    "photoCount": 2,
+    "photos": [
+      {
+        "image": "cursor_v2_map_data/infrastructure_photo_previews/85cdee26c1fa3d43.jpg",
+        "file": "Abu Bakr Sediq Grand Mosque, Taheryan.HEIC",
+        "lat": 36.30907778,
+        "lon": 68.83465556,
+        "distanceMeters": 86.23
+      },
+      {
+        "image": "cursor_v2_map_data/infrastructure_photo_previews/1e993697c5dc9a6a.jpg",
+        "file": "Damage Water Storage, Taheryan.HEIC",
+        "lat": 36.30908333,
+        "lon": 68.83453333,
+        "distanceMeters": 94.81
+      }
+    ]
+  },
+  {
+    "id": 55,
+    "priorityNumber": 4,
     "cluster": "Cluster 7",
     "intervention": "Repair of water storage",
     "location": "Gujor Ha",
@@ -1157,8 +1348,8 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 49,
-    "priorityNumber": 3,
+    "id": 56,
+    "priorityNumber": 5,
     "cluster": "Cluster 7",
     "intervention": "Construction of water storage system",
     "location": "Temoryan Payen",
@@ -1174,8 +1365,8 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 50,
-    "priorityNumber": 4,
+    "id": 57,
+    "priorityNumber": 6,
     "cluster": "Cluster 7",
     "intervention": "Irrigation Canal",
     "location": "Temoryan Payen",
@@ -1220,8 +1411,8 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 51,
-    "priorityNumber": 5,
+    "id": 58,
+    "priorityNumber": 7,
     "cluster": "Cluster 7",
     "intervention": "Irrigation Canal",
     "location": "Moghul Ha",
@@ -1287,8 +1478,8 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 52,
-    "priorityNumber": 6,
+    "id": 59,
+    "priorityNumber": 8,
     "cluster": "Cluster 7",
     "intervention": "Leveling and graveling of Road",
     "location": "Gujar Ha",
@@ -1319,8 +1510,8 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 53,
-    "priorityNumber": 7,
+    "id": 60,
+    "priorityNumber": 9,
     "cluster": "Cluster 7",
     "intervention": "Leveling and Graveling and Canal lining",
     "location": "The main road in Temoryan and Tahiri Ha connects Baghlan to Kunduz Road, up to the first culvert leading to Choraq and Wardakha. (approx. 1 KM)",
@@ -1372,8 +1563,8 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 54,
-    "priorityNumber": 8,
+    "id": 61,
+    "priorityNumber": 10,
     "cluster": "Cluster 7",
     "intervention": "Establishment of a new sub-health center",
     "location": "At the center of all five sub-villages accessible for all",
@@ -1389,7 +1580,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 55,
+    "id": 62,
     "priorityNumber": 9,
     "cluster": "Cluster 7",
     "intervention": "Installation of a steel pedestrian bridge over the Baghlan–Kunduz Road to ensure students can safely access Chaharshanba Tepa High School.",
@@ -1421,7 +1612,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 56,
+    "id": 63,
     "priorityNumber": 10,
     "cluster": "Cluster 7",
     "intervention": "Construction of school buildings",
@@ -1467,7 +1658,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 57,
+    "id": 64,
     "priorityNumber": 1,
     "cluster": "Cluster 8",
     "intervention": "Solar-powerd Water Supply Network",
@@ -1506,8 +1697,25 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 58,
+    "id": 65,
     "priorityNumber": 2,
+    "cluster": "Cluster 8",
+    "intervention": "Solar-powerd Water Supply Network",
+    "location": "Anar Khil Sardar Khil",
+    "level": "High",
+    "lat": 36.3343061,
+    "lon": 68.8159613,
+    "title": "Solar-powerd Water Supply Network",
+    "village": "Anar Khil Sardar Khil",
+    "markerClass": "infrastructure",
+    "image": "",
+    "file": "",
+    "photoCount": 0,
+    "photos": []
+  },
+  {
+    "id": 66,
+    "priorityNumber": 3,
     "cluster": "Cluster 8",
     "intervention": "Irrigation Canal",
     "location": "Anar Khil",
@@ -1523,8 +1731,8 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 59,
-    "priorityNumber": 2,
+    "id": 67,
+    "priorityNumber": 4,
     "cluster": "Cluster 8",
     "intervention": "Construction of a protection wall in Sardar Khil across Mini Bazar area (1,500 m length) (male)",
     "location": "Sardar Khil",
@@ -1540,7 +1748,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 60,
+    "id": 68,
     "priorityNumber": 5,
     "cluster": "Cluster 8",
     "intervention": "Construction of culvert along the river to facilitate transportation",
@@ -1572,7 +1780,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 61,
+    "id": 69,
     "priorityNumber": 6,
     "cluster": "Cluster 8",
     "intervention": "Establishment of sub health center SHC",
@@ -1611,7 +1819,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 62,
+    "id": 70,
     "priorityNumber": 7,
     "cluster": "Cluster 8",
     "intervention": "Construction of formal girls’ schools and",
@@ -1628,7 +1836,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 63,
+    "id": 71,
     "priorityNumber": 8,
     "cluster": "Cluster 8",
     "intervention": "Establishment of Electricity power",
@@ -1645,7 +1853,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 64,
+    "id": 72,
     "priorityNumber": 9,
     "cluster": "Cluster 8",
     "intervention": "Establishment of women’s community centers",
@@ -1662,7 +1870,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 65,
+    "id": 73,
     "priorityNumber": 1,
     "cluster": "Cluster 9",
     "intervention": "Construction of protection wall",
@@ -1687,7 +1895,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 66,
+    "id": 74,
     "priorityNumber": 2,
     "cluster": "Cluster 9",
     "intervention": "Construction of protection wall",
@@ -1733,7 +1941,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 67,
+    "id": 75,
     "priorityNumber": 3,
     "cluster": "Cluster 9",
     "intervention": "Construction of a Canal",
@@ -1765,7 +1973,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 68,
+    "id": 76,
     "priorityNumber": 4,
     "cluster": "Cluster 9",
     "intervention": "Construction of a building for School",
@@ -1804,7 +2012,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 69,
+    "id": 77,
     "priorityNumber": 5,
     "cluster": "Cluster 9",
     "intervention": "Extension of existing water supply system for all families",
@@ -1829,7 +2037,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 70,
+    "id": 78,
     "priorityNumber": 6,
     "cluster": "Cluster 9",
     "intervention": "Solar-powerd Water Supply Network",
@@ -1846,7 +2054,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 71,
+    "id": 79,
     "priorityNumber": 7,
     "cluster": "Cluster 9",
     "intervention": "Construct a basic multi‑purpose community hall (meeting room, storage, sanitation block).",
@@ -1863,7 +2071,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 72,
+    "id": 80,
     "priorityNumber": 1,
     "cluster": "Cluster 10",
     "intervention": "Reconstruction of the clinic boundary wall damaged by floods.",
@@ -1895,7 +2103,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 73,
+    "id": 81,
     "priorityNumber": 2,
     "cluster": "Cluster 10",
     "intervention": "Construction of check dams along upstream flood pathways to reduce runoff velocity and mitigate flood risks",
@@ -1920,24 +2128,39 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 74,
+    "id": 82,
     "priorityNumber": 3,
     "cluster": "Cluster 10",
     "intervention": "Construction of a basic multi-purpose community hall that can be used for meetings, training, and social events.",
     "location": "Center of Shaikh Jalal Community",
     "level": "Medium",
-    "lat": 36.099194,
-    "lon": 36.099194,
+    "lat": 36.1009916,
+    "lon": 68.85977,
     "title": "Construction of a basic multi-purpose community hall that can be used for meetings, training, and social events.",
     "village": "Center of Shaikh Jalal Community",
     "markerClass": "infrastructure",
-    "image": "",
-    "file": "",
-    "photoCount": 0,
-    "photos": []
+    "image": "cursor_v2_map_data/infrastructure_photo_previews/a17b2f9604c89070.jpg",
+    "file": "BHC - Shaikh Jalal.HEIC",
+    "photoCount": 2,
+    "photos": [
+      {
+        "image": "cursor_v2_map_data/infrastructure_photo_previews/a17b2f9604c89070.jpg",
+        "file": "BHC - Shaikh Jalal.HEIC",
+        "lat": 36.1012,
+        "lon": 68.86004722,
+        "distanceMeters": 34.02
+      },
+      {
+        "image": "cursor_v2_map_data/infrastructure_photo_previews/65e1f0030eeb4d60.jpg",
+        "file": "Check Dam, Shaikh Jalal.HEIC",
+        "lat": 36.10163889,
+        "lon": 68.85995556,
+        "distanceMeters": 73.88
+      }
+    ]
   },
   {
-    "id": 75,
+    "id": 83,
     "priorityNumber": 4,
     "cluster": "Cluster 10",
     "intervention": "Construction of a bridge to connect both sides of the village and ensure safe access to essential services year-round",
@@ -1983,7 +2206,24 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 77,
+    "id": 84,
+    "priorityNumber": 5,
+    "cluster": "Cluster 10",
+    "intervention": "Cleaning the nine water storage reservoirs and repairing damaged pipe due to flood.",
+    "location": "Shaikh Jalal",
+    "level": "High",
+    "lat": 36.1039,
+    "lon": 68.8585,
+    "title": "Cleaning the nine water storage reservoirs and repairing damaged pipe due to flood.",
+    "village": "Shaikh Jalal",
+    "markerClass": "infrastructure",
+    "image": "",
+    "file": "",
+    "photoCount": 0,
+    "photos": []
+  },
+  {
+    "id": 85,
     "priorityNumber": 6,
     "cluster": "Cluster 10",
     "intervention": "Establishment of Electricity power",
@@ -2000,7 +2240,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 78,
+    "id": 86,
     "priorityNumber": 1,
     "cluster": "Cluster 11",
     "intervention": "Solar-powerd Water Supply Network",
@@ -2017,7 +2257,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 79,
+    "id": 87,
     "priorityNumber": 2,
     "cluster": "Cluster 11",
     "intervention": "Construction of school building",
@@ -2049,7 +2289,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 80,
+    "id": 88,
     "priorityNumber": 3,
     "cluster": "Cluster 11",
     "intervention": "Repairing of existing community center hall",
@@ -2095,7 +2335,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 81,
+    "id": 89,
     "priorityNumber": 4,
     "cluster": "Cluster 11",
     "intervention": "Construction of additional rooms on top of community center building",
@@ -2141,7 +2381,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 82,
+    "id": 90,
     "priorityNumber": 5,
     "cluster": "Cluster 11",
     "intervention": "Construction of a bridge",
@@ -2158,7 +2398,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 83,
+    "id": 91,
     "priorityNumber": 6,
     "cluster": "Cluster 11",
     "intervention": "Construction of small check dams in upstream flood pathways to slow runoff and reduce flood intensity.",
@@ -2197,7 +2437,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 84,
+    "id": 92,
     "priorityNumber": 7,
     "cluster": "Cluster 11",
     "intervention": "Construction of Sub Health Center",
@@ -2229,14 +2469,31 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 86,
+    "id": 93,
+    "priorityNumber": 1,
+    "cluster": "Nawabad Cluster",
+    "intervention": "Leveling and Graveling the Main Road",
+    "location": "Nawabad Main Road",
+    "level": "High",
+    "lat": 36.7009,
+    "lon": 68.7361,
+    "title": "Leveling and Graveling the Main Road",
+    "village": "Nawabad Main Road",
+    "markerClass": "infrastructure",
+    "image": "",
+    "file": "",
+    "photoCount": 0,
+    "photos": []
+  },
+  {
+    "id": 94,
     "priorityNumber": 2,
     "cluster": "Nawabad Cluster",
     "intervention": "Leveling and gravelling of the connecting access road from Base side ( previously military base )to the Community Eid Gah",
     "location": "Road connecting the starting point of the main road from the base side to the Community Eid Gah",
     "level": "High",
-    "lat": 36.6893709,
-    "lon": 68.7541656,
+    "lat": 36.6964,
+    "lon": 68.7248,
     "title": "Leveling and gravelling of the connecting access road from Base side ( previously military base )to the Community Eid Gah",
     "village": "Road connecting the starting point of the main road from the base side to the Community Eid Gah",
     "markerClass": "infrastructure",
@@ -2246,7 +2503,7 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "photos": []
   },
   {
-    "id": 87,
+    "id": 95,
     "priorityNumber": 3,
     "cluster": "Nawabad Cluster",
     "intervention": "Construct a basic multi‑purpose community hall (meeting room, storage, sanitation block).",
@@ -2271,25 +2528,40 @@ window.INFRASTRUCTURE_PRIORITIES = [
     ]
   },
   {
-    "id": 88,
+    "id": 96,
     "priorityNumber": 4,
     "cluster": "Nawabad Cluster",
     "intervention": "Progressive lining and rehabilitation of the irrigation canal to improve water management and reduce water losses",
     "location": "Watershed and irrigation canal originating from Nawabad Konjak near to Palo Kamrak",
     "level": "High",
-    "lat": 36.692871,
-    "lon": 68.823778,
+    "lat": 36.7055,
+    "lon": 68.7451,
     "title": "Progressive lining and rehabilitation of the irrigation canal to improve water management and reduce water losses",
     "village": "Watershed and irrigation canal originating from Nawabad Konjak near to Palo Kamrak",
     "markerClass": "infrastructure",
-    "image": "",
-    "file": "",
-    "photoCount": 0,
-    "photos": []
+    "image": "cursor_v2_map_data/infrastructure_photo_previews/af1358c97b1a9717.jpg",
+    "file": "Irrigation Canal.HEIC",
+    "photoCount": 2,
+    "photos": [
+      {
+        "image": "cursor_v2_map_data/infrastructure_photo_previews/af1358c97b1a9717.jpg",
+        "file": "Irrigation Canal.HEIC",
+        "lat": 36.70551389,
+        "lon": 68.74506389,
+        "distanceMeters": 3.57
+      },
+      {
+        "image": "cursor_v2_map_data/infrastructure_photo_previews/ec15b233aa171df4.jpg",
+        "file": "Watergate Pul Panja, Nawabad Markazi1.HEIC",
+        "lat": 36.70557778,
+        "lon": 68.74494167,
+        "distanceMeters": 16.55
+      }
+    ]
   },
   {
-    "id": 89,
-    "priorityNumber": 6,
+    "id": 97,
+    "priorityNumber": 5,
     "cluster": "Nawabad Cluster",
     "intervention": "Drilling of a new borehole and installation of a water supply system to improve access to safe drinking wate",
     "location": "Returnee settlements in Nawabad Bala, Nawabad Payen, and Konjak",
@@ -2303,6 +2575,56 @@ window.INFRASTRUCTURE_PRIORITIES = [
     "file": "",
     "photoCount": 0,
     "photos": []
+  },
+  {
+    "id": 98,
+    "priorityNumber": 6,
+    "cluster": "Nawabad Cluster",
+    "intervention": "Rehabilitation and repair of Nawabad High School",
+    "location": "Nawabad Konjak",
+    "level": "High",
+    "lat": 36.70188611,
+    "lon": 68.72951389,
+    "title": "Rehabilitation and repair of Nawabad High School",
+    "village": "Nawabad Konjak",
+    "markerClass": "infrastructure",
+    "image": "cursor_v2_map_data/infrastructure_photo_previews/9ce692b40c6cf067.jpg",
+    "file": "Nawabad High School, Nawabad Kunjak.HEIC",
+    "photoCount": 1,
+    "photos": [
+      {
+        "image": "cursor_v2_map_data/infrastructure_photo_previews/9ce692b40c6cf067.jpg",
+        "file": "Nawabad High School, Nawabad Kunjak.HEIC",
+        "lat": 36.70188611,
+        "lon": 68.72951389,
+        "distanceMeters": 0
+      }
+    ]
+  },
+  {
+    "id": 99,
+    "priorityNumber": 7,
+    "cluster": "Nawabad Cluster",
+    "intervention": "Construction of one side of the boundary wall for Nawabad High School",
+    "location": "Nawabad Konjak",
+    "level": "High",
+    "lat": 36.70188611,
+    "lon": 68.72951389,
+    "title": "Construction of one side of the boundary wall for Nawabad High School",
+    "village": "Nawabad Konjak",
+    "markerClass": "infrastructure",
+    "image": "cursor_v2_map_data/infrastructure_photo_previews/9ce692b40c6cf067.jpg",
+    "file": "Nawabad High School, Nawabad Kunjak.HEIC",
+    "photoCount": 1,
+    "photos": [
+      {
+        "image": "cursor_v2_map_data/infrastructure_photo_previews/9ce692b40c6cf067.jpg",
+        "file": "Nawabad High School, Nawabad Kunjak.HEIC",
+        "lat": 36.70188611,
+        "lon": 68.72951389,
+        "distanceMeters": 0
+      }
+    ]
   }
 ];
 
@@ -2324,6 +2646,7 @@ window.INFRASTRUCTURE_FILTERS = {
   "villagesByCluster": {
     "All": [
       "Anar Khil",
+      "Anar Khil Sardar Khil",
       "Anar Khil Sardar Khil Mata Khil (PWV) Central location serving all three villages (female)",
       "Arbab Yahya and Bashi Allah dad sub-village",
       "Arbab Yahya village",
@@ -2337,6 +2660,7 @@ window.INFRASTRUCTURE_FILTERS = {
       "Center of Shaikh Jalal community",
       "Central location accessible to all villages",
       "Central location serving all villages",
+      "Chayabi Ha",
       "Chayabi Ha (along the main Ajmir canal Near to Ghandahari Ha area, 500 m length",
       "Chayabi Ha: Chayei Ha main canal, 3 critical areas that are prone to flood issues and water leakage 300 m distance",
       "Choraq",
@@ -2345,10 +2669,13 @@ window.INFRASTRUCTURE_FILTERS = {
       "Dara-e Soof ha",
       "Dawood Padshah sub-village",
       "Extension for sayed Jafar Agha",
+      "Godan Bala: main/ central street with 1 KM distance",
       "Godan Paein: Although there is a school building, children study in open areas or under tents (male FGD).",
       "Godan Paein: Godan Paien main street around 1.5 KM",
       "Godan Paein: Joye Jarib sha with 1km distance",
+      "Gudan Bala",
       "Gudan Payen",
+      "Gudan Payen along the main river – called Ajmir with total 300 m length in two different points",
       "Gujar Ha",
       "Gujor Ha",
       "Guldarayeeha",
@@ -2358,13 +2685,17 @@ window.INFRASTRUCTURE_FILTERS = {
       "Laqaei Ha",
       "Laqaei Ha & Dara-e-soof",
       "Location between Shahrak Muhajirin and Dara-e-Soof Near the Base",
+      "Main circular road of all five sub-villages",
       "Main road and internal roads of both villages",
       "Main road of both sub-villages",
       "Malem Akbar",
       "Malem Akbar & Guldarayeeha (both villages)",
       "Mata Khil",
       "Moghul Ha",
+      "Mughol Ha",
       "Mulla Toor (most vulnerable)",
+      "Nawabad Konjak",
+      "Nawabad Main Road",
       "Near Ajmir Canal sub-villages (Dawood Padshah, Sayed Jafar Agha, Noor Agha Padshah villages)",
       "Near the Community Eid Gah",
       "Near the Shaikh Jalal Basic Health Center",
@@ -2376,10 +2707,12 @@ window.INFRASTRUCTURE_FILTERS = {
       "Shahrakh Muhajirin and dara -e -soof",
       "Shaikh Jalal",
       "Shaikh Jalal (upstream areas)",
+      "Tahiri Ha",
       "Tahiri Ha sub-village including other sub-villages student",
       "Tajik Ha",
       "Temoryan Bala",
       "Temoryan Payen",
+      "Territorial road in Mula Toor sub-village",
       "The main road in Temoryan and Tahiri Ha connects Baghlan to Kunduz Road, up to the first culvert leading to Choraq and Wardakha. (approx. 1 KM)",
       "Wardak ha",
       "Wardakha",
@@ -2400,17 +2733,23 @@ window.INFRASTRUCTURE_FILTERS = {
       "At the center of all five sub-villages accessible for all",
       "Dawood Padshah sub-village",
       "Extension for sayed Jafar Agha",
+      "Main circular road of all five sub-villages",
       "Mulla Toor (most vulnerable)",
-      "Near Ajmir Canal sub-villages (Dawood Padshah, Sayed Jafar Agha, Noor Agha Padshah villages)"
+      "Near Ajmir Canal sub-villages (Dawood Padshah, Sayed Jafar Agha, Noor Agha Padshah villages)",
+      "Territorial road in Mula Toor sub-village"
     ],
     "Cluster 3": [
       "At the center of all three sub-villages accessible for all",
+      "Chayabi Ha",
       "Chayabi Ha (along the main Ajmir canal Near to Ghandahari Ha area, 500 m length",
       "Chayabi Ha: Chayei Ha main canal, 3 critical areas that are prone to flood issues and water leakage 300 m distance",
+      "Godan Bala: main/ central street with 1 KM distance",
       "Godan Paein: Although there is a school building, children study in open areas or under tents (male FGD).",
       "Godan Paein: Godan Paien main street around 1.5 KM",
       "Godan Paein: Joye Jarib sha with 1km distance",
-      "Gudan Payen"
+      "Gudan Bala",
+      "Gudan Payen",
+      "Gudan Payen along the main river – called Ajmir with total 300 m length in two different points"
     ],
     "Cluster 4": [
       "Between both sub-villages / central, accessible point",
@@ -2438,6 +2777,8 @@ window.INFRASTRUCTURE_FILTERS = {
       "Gujor Ha",
       "Jamaluddin Khan Secondary School (Moghul Ha Village – currently tent-based",
       "Moghul Ha",
+      "Mughol Ha",
+      "Tahiri Ha",
       "Tahiri Ha sub-village including other sub-villages student",
       "Temoryan Bala",
       "Temoryan Payen",
@@ -2445,6 +2786,7 @@ window.INFRASTRUCTURE_FILTERS = {
     ],
     "Cluster 8": [
       "Anar Khil",
+      "Anar Khil Sardar Khil",
       "Anar Khil Sardar Khil Mata Khil (PWV) Central location serving all three villages (female)",
       "Central location accessible to all villages",
       "Central location serving all villages",
@@ -2469,6 +2811,8 @@ window.INFRASTRUCTURE_FILTERS = {
       "Oshtor Ghalt"
     ],
     "Nawabad Cluster": [
+      "Nawabad Konjak",
+      "Nawabad Main Road",
       "Near the Community Eid Gah",
       "Returnee settlements in Nawabad Bala, Nawabad Payen, and Konjak",
       "Road connecting the starting point of the main road from the base side to the Community Eid Gah",

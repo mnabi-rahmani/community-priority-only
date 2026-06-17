@@ -1,21 +1,15 @@
 import fs from "node:fs";
 import path from "node:path";
-import { fileURLToPath } from "node:url";
 
 import XLSX from "xlsx";
 
-const scriptDir = path.dirname(fileURLToPath(import.meta.url));
-const deployedDir = path.resolve(scriptDir, "..");
-const infrastructureAssetsRoot = path.join(
-  deployedDir,
-  "Assets Needed",
-  "Infrastructure list for priority mapping"
-);
+import { deployedDir, infrastructureAssetsRoot } from "./infrastructure-assets-path.mjs";
+
 const reviewPath = path.join(deployedDir, "cursor_v2_map_data", "infrastructure_priorities_review.json");
 
 const excelFiles = [
-  { fileName: "Baghlan Infrastructure Priorities.xlsx", region: "Baghlan-e-Jadid" },
-  { fileName: "Nawabad Infrastructure Priorities.xlsx", region: "Nawabad", defaultCluster: "Nawabad Cluster" }
+  { fileName: "Baghlan Infrastructure Priorities v3.xlsx", region: "Baghlan-e-Jadid" },
+  { fileName: "Nawabad Infrastructure Priorities v2.xlsx", region: "Nawabad", defaultCluster: "Nawabad Cluster" }
 ];
 
 function compactWhitespace(value) {
