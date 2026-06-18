@@ -865,12 +865,10 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
 
       if (entry.group === "Boundaries") {
         if (entry.id === "boundary_cluster") {
-          if (cluster === "All") return BAGHLAN_CLUSTERS.has(normalizeCluster(props.Name));
-          return normalizeCluster(props.Name) === cluster;
+          return BAGHLAN_CLUSTERS.has(normalizeCluster(props.Name));
         }
         if (entry.id === "boundary_community") {
-          if (cluster === "All") return true;
-          return featureCluster(props) === cluster;
+          return Boolean(props.Name);
         }
         return true;
       }
@@ -1260,7 +1258,9 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
         `<option value="All">All communities</option>`,
         ...communities.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
       ].join("");
-      const match = communities.find((name) => villageMatches(name, previous));
+      const match = previous && previous !== "All"
+        ? communities.find((name) => villageMatches(name, previous))
+        : null;
       villageFilter.value = match || "All";
     }
 
@@ -1425,85 +1425,55 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       return L.latLngBounds(boundsPoints);
     }
 
-    function mapContainsBounds(bounds) {
-      const viewBounds = map.getBounds();
-      return viewBounds.contains(bounds.getSouthWest()) && viewBounds.contains(bounds.getNorthEast());
+    const CLUSTER_FIT_PADDING = 0.18;
+    const COMMUNITY_FIT_PADDING = 0.14;
+
+    function fitMapToBounds(bounds, { animate = true, padding = CLUSTER_FIT_PADDING } = {}) {
+      if (!bounds?.isValid()) return;
+      map.invalidateSize();
+      map.fitBounds(bounds.pad(padding), { animate });
     }
 
-    function fitBoundsWithVisibleContext(focusBounds, contextBounds, { animate = true, padding = 0.12 } = {}) {
-      if (!focusBounds?.isValid()) return;
-      const focusCenter = focusBounds.getCenter();
-      const paddedFocus = focusBounds.pad(padding);
-      const paddedContext = contextBounds?.isValid() ? contextBounds.pad(padding) : null;
-      const mapSize = map.getSize();
-
-      let zoom = map.getBoundsZoom(paddedFocus, false, mapSize);
-      zoom = Math.min(zoom, map.getMaxZoom());
-      zoom = Math.max(zoom, map.getMinZoom());
-
-      if (paddedContext) {
-        map.setView(focusCenter, zoom, { animate: false });
-        while (zoom > map.getMinZoom() && !mapContainsBounds(paddedContext)) {
-          zoom = Math.max(map.getMinZoom(), zoom - MAP_ZOOM_STEP);
-          map.setView(focusCenter, zoom, { animate: false });
-        }
-      }
-
-      map.setView(focusCenter, zoom, { animate });
-    }
-
-    function allCommunityBoundaryBounds(cluster) {
-      return boundsFromFeatures(communityBoundaries(cluster, "All"));
-    }
-
-    function allClusterAndCommunityBounds(cluster) {
-      const features = [
-        ...baghlanClusterBoundaries("All"),
-        ...communityBoundaries(cluster, "All")
-      ];
-      return boundsFromFeatures(features);
-    }
-
-    function fitToClusterBoundary(clusterName, { animate = true } = {}) {
+    function fitToClusterSelection(clusterName, { animate = true } = {}) {
       const bounds = boundsFromFeatures(baghlanClusterBoundaries(clusterName));
-      if (!bounds) return;
-      map.fitBounds(bounds.pad(0.12), { animate });
+      fitMapToBounds(bounds, { animate, padding: CLUSTER_FIT_PADDING });
     }
 
     function fitToDefaultHomeView({ animate = false } = {}) {
-      const homeBounds = boundsFromFeatures(baghlanClusterBoundaries(DEFAULT_START_CLUSTER));
-      const allClustersBounds = boundsFromFeatures(baghlanClusterBoundaries("All"));
-      if (!homeBounds) return;
-      fitBoundsWithVisibleContext(homeBounds, allClustersBounds, { animate, padding: 0.12 });
+      fitToClusterSelection(DEFAULT_START_CLUSTER, { animate });
     }
+
+    function scheduleInitialMapView() {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          map.invalidateSize();
+          fitToDefaultHomeView({ animate: false });
+          scheduleMapLayoutRefresh();
+        });
+      });
+    }
+
+    window.addEventListener("load", () => {
+      if (clusterFilter.value === "All" && villageFilter.value === "All") {
+        map.invalidateSize();
+        fitToDefaultHomeView({ animate: false });
+        scheduleMapLayoutRefresh();
+      }
+    }, { once: true });
 
     function fitToSelection(points) {
       const cluster = clusterFilter.value;
       const village = villageFilter.value;
-      const isFiltered = cluster !== "All" || village !== "All";
+      const animate = cluster !== "All" || village !== "All";
 
       if (village !== "All") {
         const communityBounds = boundsFromFeatures(communityBoundaries(cluster, village));
-        const contextBounds = allCommunityBoundaryBounds(cluster);
-        if (communityBounds) {
-          fitBoundsWithVisibleContext(communityBounds, contextBounds, { animate: true, padding: 0.12 });
-          return;
-        }
-      } else if (cluster !== "All") {
-        const clusterBounds = boundsFromFeatures(baghlanClusterBoundaries(cluster));
-        const contextBounds = allClusterAndCommunityBounds(cluster);
-        if (clusterBounds) {
-          fitBoundsWithVisibleContext(clusterBounds, contextBounds, { animate: true, padding: 0.12 });
-          return;
-        }
-      } else {
-        fitToDefaultHomeView({ animate: isFiltered });
+        fitMapToBounds(communityBounds, { animate: true, padding: COMMUNITY_FIT_PADDING });
         return;
       }
 
-      const bounds = fitToVisiblePoints(points);
-      if (!bounds) return;
-      map.fitBounds(bounds.pad(0.12), { animate: true });
+      const focusCluster = cluster === "All" ? DEFAULT_START_CLUSTER : cluster;
+      fitToClusterSelection(focusCluster, { animate });
     }
 
     function applyFilters(shouldFitBounds) {
@@ -1537,7 +1507,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     initPriorityMarkers();
     initDatabaseLayers();
     applyFilters(false);
-    fitToDefaultHomeView({ animate: false });
+    scheduleInitialMapView();
 
     map.on("baselayerchange", (event) => {
       syncBasemapFilterFromMap(event.layer);

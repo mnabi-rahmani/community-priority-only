@@ -11,7 +11,7 @@
     "sync:cluster-priorities-assets": "powershell -NoProfile -ExecutionPolicy Bypass -File ../sync-cluster-priorities-assets-map.ps1",
     "generate:cluster-priorities": "npm --prefix ../deployed run generate:infrastructure",
     "generate:community-priorities": "npm --prefix ../deployed run generate:data",
-    "sync:root": "powershell -NoProfile -Command \"Copy-Item index.html dist/index.html -Force\"",
+    "sync:root": "powershell -NoProfile -ExecutionPolicy Bypass -File ../sync-root.ps1",
     "sync:all-priorities": "npm run sync:priorities && npm run sync:cluster-priorities && npm run sync:cluster-priorities-assets && npm run sync:root",
     "sync:images": "powershell -NoProfile -ExecutionPolicy Bypass -File ../sync-priority-map-images-to-s3.ps1",
     "deploy:maps": "powershell -NoProfile -ExecutionPolicy Bypass -File ../deploy-maps-to-aws.ps1",
