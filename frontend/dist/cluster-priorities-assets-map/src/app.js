@@ -1370,15 +1370,33 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       clusterFilter.value = "All";
     }
 
+    function communityNamesForCluster(cluster) {
+      const geojson = LAYERS.boundary_community;
+      if (!geojson) return [];
+      const names = new Set();
+      geojson.features.forEach((feature) => {
+        const props = feature.properties || {};
+        const name = props.Name;
+        if (!name) return;
+        if (cluster !== "All") {
+          const featureClusterValue = featureCluster(props);
+          if (featureClusterValue && featureClusterValue !== cluster) return;
+        }
+        names.add(name);
+      });
+      return [...names].sort((a, b) => a.localeCompare(b, undefined, { sensitivity: "base" }));
+    }
+
     function populateVillageFilter() {
       const selectedCluster = clusterFilter.value;
-      const villages = selectedCluster === "All"
-        ? FILTER_META.villagesByCluster.All || []
-        : FILTER_META.villagesByCluster[selectedCluster] || [];
+      const communities = communityNamesForCluster(selectedCluster);
+      const previous = villageFilter.value;
       villageFilter.innerHTML = [
-        `<option value="All">${IS_INFRASTRUCTURE_DISPLAY ? "All locations" : "All villages"}</option>`,
-        ...villages.map((village) => `<option value="${village}">${village}</option>`)
+        `<option value="All">All communities</option>`,
+        ...communities.map((name) => `<option value="${escapeHtml(name)}">${escapeHtml(name)}</option>`)
       ].join("");
+      const match = communities.find((name) => villageMatches(name, previous));
+      villageFilter.value = match || "All";
     }
 
     function filteredPriorityPoints() {
@@ -1597,57 +1615,43 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       return L.latLngBounds(boundsPoints);
     }
 
-    function fitCenterWithBoundsConstraint(center, constraintBounds, { animate = true, padding = 0.08 } = {}) {
-      if (!constraintBounds?.isValid()) return;
-      const padded = constraintBounds.pad(padding);
-      const corners = [
-        padded.getNorthWest(),
-        padded.getNorthEast(),
-        padded.getSouthWest(),
-        padded.getSouthEast()
-      ];
-
-      function allCornersVisible(testZoom) {
-        map.setView(center, testZoom, { animate: false });
-        const viewBounds = map.getBounds();
-        return corners.every((corner) => viewBounds.contains(corner));
-      }
-
-      let bestZoom = map.getMinZoom();
-      for (let zoom = map.getMaxZoom(); zoom >= map.getMinZoom(); zoom -= MAP_ZOOM_STEP) {
-        if (allCornersVisible(zoom)) {
-          bestZoom = zoom;
-          break;
-        }
-      }
-
-      map.setView(center, bestZoom, { animate });
+    function mapContainsBounds(bounds) {
+      const viewBounds = map.getBounds();
+      return viewBounds.contains(bounds.getSouthWest()) && viewBounds.contains(bounds.getNorthEast());
     }
 
-    function villageContextFeatures(cluster, village) {
-      const villageFeatures = communityBoundaries(cluster, village);
-      if (!villageFeatures.length) return villageFeatures;
+    function fitBoundsWithVisibleContext(focusBounds, contextBounds, { animate = true, padding = 0.12 } = {}) {
+      if (!focusBounds?.isValid()) return;
+      const focusCenter = focusBounds.getCenter();
+      const paddedFocus = focusBounds.pad(padding);
+      const paddedContext = contextBounds?.isValid() ? contextBounds.pad(padding) : null;
+      const mapSize = map.getSize();
 
-      let contextCluster = cluster;
-      if (cluster === "All") {
-        contextCluster = featureCluster(villageFeatures[0].properties || {}) || "All";
-      }
+      let zoom = map.getBoundsZoom(paddedFocus, false, mapSize);
+      zoom = Math.min(zoom, map.getMaxZoom());
+      zoom = Math.max(zoom, map.getMinZoom());
 
-      const features = [...villageFeatures];
-      if (contextCluster && contextCluster !== "All") {
-        features.push(...baghlanClusterBoundaries(contextCluster));
-        const geojson = LAYERS.boundary_community;
-        if (geojson) {
-          geojson.features.forEach((feature) => {
-            const props = feature.properties || {};
-            if (!props.Name) return;
-            if (featureCluster(props) === contextCluster) features.push(feature);
-          });
+      if (paddedContext) {
+        map.setView(focusCenter, zoom, { animate: false });
+        while (zoom > map.getMinZoom() && !mapContainsBounds(paddedContext)) {
+          zoom = Math.max(map.getMinZoom(), zoom - MAP_ZOOM_STEP);
+          map.setView(focusCenter, zoom, { animate: false });
         }
-      } else {
-        features.push(...baghlanClusterBoundaries("All"));
       }
-      return features;
+
+      map.setView(focusCenter, zoom, { animate });
+    }
+
+    function allCommunityBoundaryBounds(cluster) {
+      return boundsFromFeatures(communityBoundaries(cluster, "All"));
+    }
+
+    function allClusterAndCommunityBounds(cluster) {
+      const features = [
+        ...baghlanClusterBoundaries("All"),
+        ...communityBoundaries(cluster, "All")
+      ];
+      return boundsFromFeatures(features);
     }
 
     function fitToClusterBoundary(clusterName, { animate = true } = {}) {
@@ -1657,10 +1661,10 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     }
 
     function fitToDefaultHomeView({ animate = false } = {}) {
-      const allBounds = boundsFromFeatures(baghlanClusterBoundaries("All"));
-      const focusBounds = boundsFromFeatures(baghlanClusterBoundaries(DEFAULT_START_CLUSTER));
-      if (!allBounds || !focusBounds) return;
-      fitCenterWithBoundsConstraint(focusBounds.getCenter(), allBounds, { animate, padding: 0.08 });
+      const homeBounds = boundsFromFeatures(baghlanClusterBoundaries(DEFAULT_START_CLUSTER));
+      const allClustersBounds = boundsFromFeatures(baghlanClusterBoundaries("All"));
+      if (!homeBounds) return;
+      fitBoundsWithVisibleContext(homeBounds, allClustersBounds, { animate, padding: 0.12 });
     }
 
     function fitToSelection(points) {
@@ -1669,15 +1673,19 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       const isFiltered = cluster !== "All" || village !== "All";
 
       if (village !== "All") {
-        const villageBounds = boundsFromFeatures(communityBoundaries(cluster, village));
-        const contextBounds = boundsFromFeatures(villageContextFeatures(cluster, village));
-        if (villageBounds && contextBounds) {
-          fitCenterWithBoundsConstraint(villageBounds.getCenter(), contextBounds, { animate: true, padding: 0.12 });
+        const communityBounds = boundsFromFeatures(communityBoundaries(cluster, village));
+        const contextBounds = allCommunityBoundaryBounds(cluster);
+        if (communityBounds) {
+          fitBoundsWithVisibleContext(communityBounds, contextBounds, { animate: true, padding: 0.12 });
           return;
         }
       } else if (cluster !== "All") {
-        fitToClusterBoundary(cluster, { animate: true });
-        return;
+        const clusterBounds = boundsFromFeatures(baghlanClusterBoundaries(cluster));
+        const contextBounds = allClusterAndCommunityBounds(cluster);
+        if (clusterBounds) {
+          fitBoundsWithVisibleContext(clusterBounds, contextBounds, { animate: true, padding: 0.12 });
+          return;
+        }
       } else {
         fitToDefaultHomeView({ animate: isFiltered });
         return;
