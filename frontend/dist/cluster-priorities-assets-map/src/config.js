@@ -40,7 +40,7 @@ window.COMMUNITY_PRIORITIES_CONFIG = {
     {
       id: "assets-community-priorities",
       label: "Assets and Community Priorities Old",
-      href: "/community-priorities-map/map.htm"
+      href: "/map.htm"
     },
     {
       id: "cluster-priorities-only",
@@ -53,7 +53,7 @@ window.COMMUNITY_PRIORITIES_CONFIG = {
       href: "/cluster-priorities-assets-map/map.htm"
     }
   ],
-  priorityPhotoBaseUrl: "",
+  priorityPhotoBaseUrl: "https://community-priorities-map-assets-974389254535-us-east-1.s3.us-east-1.amazonaws.com/community-priorities/priority-previews/",
   authApiBaseUrl: "https://tfqmwiadc8.execute-api.us-east-1.amazonaws.com",
   allowedAuthModules: ["clusters_map", "all"]
 };

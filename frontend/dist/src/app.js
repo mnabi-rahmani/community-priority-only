@@ -565,6 +565,26 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       return items;
     }
 
+    function setLayerInteractive(layer, interactive) {
+      if (!layer) return;
+      layer.options.interactive = interactive;
+
+      const element = layer.getElement?.();
+      if (element) {
+        if (interactive) {
+          L.DomUtil.addClass(element, "leaflet-interactive");
+          layer.addInteractiveTarget?.(element);
+        } else {
+          layer.removeInteractiveTarget?.(element);
+          L.DomUtil.removeClass(element, "leaflet-interactive");
+        }
+      }
+
+      if (typeof layer._updateInteractive === "function") {
+        layer._updateInteractive();
+      }
+    }
+
     function updateZoomVisibility() {
       const zoom = map.getZoom();
       const showPriorities = zoom >= ZOOM_SHOW_PRIORITIES;
@@ -582,7 +602,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
         priorityGroup.eachLayer((layer) => {
           if (layer === corridorLayer) return;
           if (layer.setOpacity) layer.setOpacity(showPriorities ? 1 : 0);
-          if (layer.options) layer.options.interactive = showPriorities;
+          setLayerInteractive(layer, showPriorities);
         });
       }
 
@@ -613,7 +633,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
               fillOpacity: showFacilities ? 0.95 : 0
             });
           }
-          if (layer.options) layer.options.interactive = showFacilities;
+          setLayerInteractive(layer, showFacilities);
         });
       });
     }
@@ -965,10 +985,6 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     function bindBoundaryLabel(featureLayer, layerId, properties) {
       const label = properties?.Name;
       featureLayer.options.interactive = false;
-      featureLayer.on("add", () => {
-        const element = featureLayer.getElement?.();
-        if (element) element.style.pointerEvents = "none";
-      });
       if (!label) return;
       featureLayer.bindTooltip(label, {
         permanent: true,
@@ -1740,6 +1756,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       filterSummary.textContent = IS_INFRASTRUCTURE_DISPLAY
         ? `Showing ${points.length} infrastructure priorities. Use each popup to browse nearby photos within ${AREA_PHOTO_RADIUS_METERS} m.`
         : `Showing ${points.length} priority locations (${countPriorityPhotos(points)} of ${ALL_PRIORITY_POINTS.reduce((total, point) => total + (point.photoCount || pointPhotos(point).length || 1), 0)} photos) and ${countVisibleFacilities()} Integrated Locations Database features`;
+      updateZoomVisibility();
       if (shouldFitBounds) fitToSelection(points);
       scheduleMapLayoutRefresh();
     }

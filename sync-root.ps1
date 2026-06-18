@@ -17,7 +17,12 @@ if (!(Test-Path $RootIndex)) {
 Write-Host "Mirroring community map bundle to dist root for local /map.htm..."
 Get-ChildItem $CommunityMapDir | ForEach-Object {
     $destination = Join-Path $DistDir $_.Name
-    Copy-Item $_.FullName $destination -Recurse -Force
+    if ($_.PSIsContainer) {
+        New-Item -ItemType Directory -Force -Path $destination | Out-Null
+        Copy-Item (Join-Path $_.FullName "*") $destination -Recurse -Force
+    } else {
+        Copy-Item $_.FullName $destination -Force
+    }
 }
 
 Copy-Item $RootIndex (Join-Path $DistDir "index.html") -Force
