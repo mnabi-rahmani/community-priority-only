@@ -6,6 +6,7 @@
   const LEGEND_SCALE = 2.25;
   const TITLE_FONT_SIZE = 60;
   const SUBTITLE_FONT_SIZE = 34;
+  const TITLE_SUBTITLE_GAP = 28;
   const LEGEND_SYMBOL_SIZE = 18 * LEGEND_SCALE;
   const LEGEND_ROW_HEIGHT = 22 * LEGEND_SCALE;
   const LEGEND_PADDING = 10 * LEGEND_SCALE;
@@ -431,7 +432,7 @@
 
   function buildFramedCanvas(mapCanvas, metadata) {
     const padding = 48;
-    const headerHeight = TITLE_FONT_SIZE + 12 + SUBTITLE_FONT_SIZE + 24;
+    const headerHeight = TITLE_FONT_SIZE + TITLE_SUBTITLE_GAP + SUBTITLE_FONT_SIZE + 24;
     const footerHeight = 44;
     const framed = document.createElement("canvas");
     framed.width = mapCanvas.width + padding * 2;
@@ -447,7 +448,7 @@
 
     ctx.fillStyle = "#5b6764";
     ctx.font = `600 ${SUBTITLE_FONT_SIZE}px Arial, Helvetica, sans-serif`;
-    ctx.fillText(metadata.subtitle, padding, padding + TITLE_FONT_SIZE + 12 + SUBTITLE_FONT_SIZE);
+    ctx.fillText(metadata.subtitle, padding, padding + TITLE_FONT_SIZE + TITLE_SUBTITLE_GAP + SUBTITLE_FONT_SIZE);
 
     const mapY = padding + headerHeight;
     ctx.strokeStyle = "#d8dfda";

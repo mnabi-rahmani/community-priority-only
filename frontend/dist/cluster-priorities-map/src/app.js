@@ -91,7 +91,15 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       "All": "Across Baghlan and Nawabad, community FGDs identified recurring needs around flood protection, WASH, education facilities, road access, health services, and shelter. Use the cluster and village filters to explore photo-backed evidence linked to each priority theme."
     };
 
-    const map = L.map("map", { zoomControl: true, preferCanvas: true });
+    const MAP_ZOOM_STEP = 0.25;
+    const map = L.map("map", {
+      preferCanvas: true,
+      zoomControl: false,
+      zoomSnap: MAP_ZOOM_STEP,
+      zoomDelta: MAP_ZOOM_STEP,
+      wheelPxPerZoomLevel: 160
+    });
+    L.control.zoom({ position: "bottomright" }).addTo(map);
 
     function createBaseMap(name, url, options) {
       const layer = L.tileLayer(url, options);
@@ -1589,32 +1597,95 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       return L.latLngBounds(boundsPoints);
     }
 
+    function fitCenterWithBoundsConstraint(center, constraintBounds, { animate = true, padding = 0.08 } = {}) {
+      if (!constraintBounds?.isValid()) return;
+      const padded = constraintBounds.pad(padding);
+      const corners = [
+        padded.getNorthWest(),
+        padded.getNorthEast(),
+        padded.getSouthWest(),
+        padded.getSouthEast()
+      ];
+
+      function allCornersVisible(testZoom) {
+        map.setView(center, testZoom, { animate: false });
+        const viewBounds = map.getBounds();
+        return corners.every((corner) => viewBounds.contains(corner));
+      }
+
+      let bestZoom = map.getMinZoom();
+      for (let zoom = map.getMaxZoom(); zoom >= map.getMinZoom(); zoom -= MAP_ZOOM_STEP) {
+        if (allCornersVisible(zoom)) {
+          bestZoom = zoom;
+          break;
+        }
+      }
+
+      map.setView(center, bestZoom, { animate });
+    }
+
+    function villageContextFeatures(cluster, village) {
+      const villageFeatures = communityBoundaries(cluster, village);
+      if (!villageFeatures.length) return villageFeatures;
+
+      let contextCluster = cluster;
+      if (cluster === "All") {
+        contextCluster = featureCluster(villageFeatures[0].properties || {}) || "All";
+      }
+
+      const features = [...villageFeatures];
+      if (contextCluster && contextCluster !== "All") {
+        features.push(...baghlanClusterBoundaries(contextCluster));
+        const geojson = LAYERS.boundary_community;
+        if (geojson) {
+          geojson.features.forEach((feature) => {
+            const props = feature.properties || {};
+            if (!props.Name) return;
+            if (featureCluster(props) === contextCluster) features.push(feature);
+          });
+        }
+      } else {
+        features.push(...baghlanClusterBoundaries("All"));
+      }
+      return features;
+    }
+
     function fitToClusterBoundary(clusterName, { animate = true } = {}) {
       const bounds = boundsFromFeatures(baghlanClusterBoundaries(clusterName));
       if (!bounds) return;
       map.fitBounds(bounds.pad(0.12), { animate });
     }
 
+    function fitToDefaultHomeView({ animate = false } = {}) {
+      const allBounds = boundsFromFeatures(baghlanClusterBoundaries("All"));
+      const focusBounds = boundsFromFeatures(baghlanClusterBoundaries(DEFAULT_START_CLUSTER));
+      if (!allBounds || !focusBounds) return;
+      fitCenterWithBoundsConstraint(focusBounds.getCenter(), allBounds, { animate, padding: 0.08 });
+    }
+
     function fitToSelection(points) {
       const cluster = clusterFilter.value;
       const village = villageFilter.value;
       const isFiltered = cluster !== "All" || village !== "All";
-      let bounds = null;
 
       if (village !== "All") {
-        bounds = boundsFromFeatures(communityBoundaries(cluster, village));
+        const villageBounds = boundsFromFeatures(communityBoundaries(cluster, village));
+        const contextBounds = boundsFromFeatures(villageContextFeatures(cluster, village));
+        if (villageBounds && contextBounds) {
+          fitCenterWithBoundsConstraint(villageBounds.getCenter(), contextBounds, { animate: true, padding: 0.12 });
+          return;
+        }
       } else if (cluster !== "All") {
-        bounds = boundsFromFeatures(baghlanClusterBoundaries(cluster));
+        fitToClusterBoundary(cluster, { animate: true });
+        return;
       } else {
-        bounds = boundsFromFeatures(baghlanClusterBoundaries("All"));
+        fitToDefaultHomeView({ animate: isFiltered });
+        return;
       }
 
-      if (!bounds) {
-        bounds = fitToVisiblePoints(points);
-      }
+      const bounds = fitToVisiblePoints(points);
       if (!bounds) return;
-
-      map.fitBounds(bounds.pad(isFiltered ? 0.12 : 0.08), { animate: isFiltered });
+      map.fitBounds(bounds.pad(0.12), { animate: true });
     }
 
     function applyFilters(shouldFitBounds) {
@@ -1649,7 +1720,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     initPriorityMarkers();
     initDatabaseLayers();
     applyFilters(false);
-    fitToClusterBoundary(DEFAULT_START_CLUSTER, { animate: false });
+    fitToDefaultHomeView({ animate: false });
 
     map.on("baselayerchange", (event) => {
       syncBasemapFilterFromMap(event.layer);

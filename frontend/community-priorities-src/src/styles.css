@@ -959,6 +959,31 @@
     .leaflet-control-layers,
     .leaflet-bar { border-radius: 8px; }
 
+    .leaflet-control-zoom {
+      border: 1px solid rgba(216, 223, 218, 0.95) !important;
+      box-shadow: 0 8px 24px rgba(22, 32, 30, 0.12);
+      overflow: hidden;
+    }
+
+    .leaflet-control-zoom a {
+      width: 36px;
+      height: 36px;
+      line-height: 36px;
+      font-size: 20px;
+      color: #1f2d2a;
+      background: rgba(255, 255, 255, 0.96);
+    }
+
+    .leaflet-control-zoom a:hover {
+      background: #f0f5f3;
+      color: #16332f;
+    }
+
+    .leaflet-bottom.leaflet-right .leaflet-control-zoom {
+      margin-bottom: 18px;
+      margin-right: 18px;
+    }
+
     .leaflet-control-layers-toggle {
       width: 36px;
       height: 36px;

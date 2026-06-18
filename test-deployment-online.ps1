@@ -31,17 +31,17 @@ Write-Host ""
 
 try {
     $isolatedResponse = Invoke-WebRequest -Uri $isolatedBase -UseBasicParsing -TimeoutSec 30
-    if ($isolatedResponse.StatusCode -eq 200 -and $isolatedResponse.Content -match "Assets and Community Priorities|Community Priorities Map|leaflet") {
-        Pass "Isolated community map root is reachable ($isolatedBase)"
+    if ($isolatedResponse.StatusCode -eq 200 -and $isolatedResponse.Content -match "cluster-priorities-assets-map/map.htm|Cluster Priorities and Assets") {
+        Pass "Isolated map root redirects to cluster priorities and assets ($isolatedBase)"
     } else {
-        Fail-Check "Isolated community map returned unexpected content from $isolatedBase"
+        Fail-Check "Isolated map root returned unexpected content from $isolatedBase"
     }
 } catch {
-    Fail-Check "Isolated community map is not reachable: $($_.Exception.Message)"
+    Fail-Check "Isolated map root is not reachable: $($_.Exception.Message)"
 }
 
 $mapPaths = @(
-    @{ Path = "/"; Label = "community map root" },
+    @{ Path = "/"; Label = "map root redirect" },
     @{ Path = "/map.htm"; Label = "community map.htm" },
     @{ Path = "/cluster-priorities-map/map.htm"; Label = "cluster priorities map" },
     @{ Path = "/cluster-priorities-assets-map/map.htm"; Label = "cluster priorities and assets map" }
@@ -51,7 +51,10 @@ foreach ($entry in $mapPaths) {
     $mapUrl = "$isolatedBase$($entry.Path)"
     try {
         $mapResponse = Invoke-WebRequest -Uri $mapUrl -UseBasicParsing -TimeoutSec 30
-        if ($mapResponse.StatusCode -eq 200 -and $mapResponse.Content -match "leaflet|Community Priorities|INFRASTRUCTURE_PRIORITIES|authScreen|Sign in") {
+        if ($mapResponse.StatusCode -eq 200 -and (
+            ($entry.Path -eq "/" -and $mapResponse.Content -match "cluster-priorities-assets-map/map.htm|Cluster Priorities and Assets") -or
+            ($entry.Path -ne "/" -and $mapResponse.Content -match "leaflet|Community Priorities|INFRASTRUCTURE_PRIORITIES|authScreen|Sign in")
+        )) {
             Pass "Map route is deployed ($($entry.Label))"
         } else {
             Fail-Check "Map route '$($entry.Path)' returned unexpected content"

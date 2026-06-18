@@ -140,13 +140,13 @@ LAYER_CONFIG = {
         "id": "protection_walls",
         "label": "Protection walls",
         "group": "Flood / DRR",
-        "style": {"strokeColor": "#2f7d72", "strokeWidth": 3}
+        "style": {"strokeColor": "#16a34a", "strokeWidth": 3}
     },
     "FloodWayLine": {
         "id": "flood_ways",
         "label": "Flood ways",
         "group": "Flood / DRR",
-        "style": {"strokeColor": "#2f7d72", "strokeWidth": 3}
+        "style": {"strokeColor": "#0284c7", "strokeWidth": 3}
     },
     "Flood_Way_Paths": {
         "id": "flood_way_paths",

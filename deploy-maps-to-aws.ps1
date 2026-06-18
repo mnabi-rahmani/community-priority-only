@@ -102,6 +102,6 @@ if (-not $SkipVerify) {
 
 Write-Host ""
 Write-Host "Maps deployment completed."
-Write-Host "Community map: $IsolatedMapUrl/"
+Write-Host "Main map     : $IsolatedMapUrl/"
 Write-Host "Cluster map  : $IsolatedMapUrl/cluster-priorities-map/map.htm"
-Write-Host "Cluster + assets: $IsolatedMapUrl/cluster-priorities-assets-map/map.htm"
+Write-Host "Community map: $IsolatedMapUrl/map.htm"

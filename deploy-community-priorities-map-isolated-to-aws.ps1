@@ -180,7 +180,7 @@ window.COMMUNITY_PRIORITIES_CONFIG = {
     {
       id: "assets-community-priorities",
       label: "Assets and Community Priorities Old",
-      href: "/"
+      href: "/map.htm"
     },
     {
       id: "cluster-priorities-only",
@@ -216,7 +216,7 @@ window.COMMUNITY_PRIORITIES_CONFIG = {
     {
       id: "assets-community-priorities",
       label: "Assets and Community Priorities Old",
-      href: "/"
+      href: "/map.htm"
     },
     {
       id: "cluster-priorities-only",
@@ -279,7 +279,7 @@ window.COMMUNITY_PRIORITIES_CONFIG = {
     {
       id: "assets-community-priorities",
       label: "Assets and Community Priorities Old",
-      href: "/"
+      href: "/map.htm"
     },
     {
       id: "cluster-priorities-only",
@@ -310,6 +310,19 @@ Invoke-Aws @(
     "--cache-control", $AppCacheControl,
     "--exclude", "cluster-priorities-map/*",
     "--exclude", "cluster-priorities-assets-map/*"
+)
+
+$RootIndexPath = Join-Path $PSScriptRoot "frontend\index.html"
+if (!(Test-Path $RootIndexPath)) {
+    Fail "Root redirect index '$RootIndexPath' was not found."
+}
+
+Write-Host "Uploading root redirect to Cluster Priorities and Assets map..."
+Invoke-Aws @(
+    "s3", "cp", $RootIndexPath, "s3://$AppBucketName/index.html",
+    "--region", $Region,
+    "--cache-control", $AppCacheControl,
+    "--content-type", "text/html"
 )
 
 if (!(Test-Path $ClusterTargetDir)) {
