@@ -11,6 +11,7 @@
     "audit:infrastructure-mapping": "node scripts/audit-infrastructure-mapping.mjs",
     "audit:photo-orphans": "node scripts/audit-photo-orphans.mjs",
     "audit:infrastructure-photos": "node scripts/audit-infrastructure-priority-photos.mjs",
+    "audit:map-images": "node scripts/audit-map-images.mjs",
     "export:infrastructure-comparison": "node scripts/export-infrastructure-map-comparison.mjs",
     "generate:layers": "powershell -NoProfile -ExecutionPolicy Bypass -Command \"& 'C:\\Program Files\\ArcGIS\\Pro\\bin\\Python\\Scripts\\propy.bat' scripts/export-gdb-layers.py\"",
     "dev": "serve . -l 5174",

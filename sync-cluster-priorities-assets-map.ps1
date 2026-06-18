@@ -104,6 +104,11 @@ if (Test-Path $previewSource) {
     Copy-Item $previewSource (Join-Path $targetDataDir "infrastructure_photo_previews") -Recurse -Force
 }
 
+$areaPhotoPreviewSource = Join-Path $DataDir "photo_previews"
+if (Test-Path $areaPhotoPreviewSource) {
+    Copy-Item $areaPhotoPreviewSource (Join-Path $targetDataDir "photo_previews") -Recurse -Force
+}
+
 $iconsSource = Join-Path $DataDir "icons"
 if (Test-Path $iconsSource) {
     Copy-Item $iconsSource (Join-Path $targetDataDir "icons") -Recurse -Force

@@ -4,7 +4,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       ? rawPriorityPhotoBaseUrl.replace(/\/?$/, "/")
       : "";
     const USE_LOCAL_PRIORITY_PHOTOS = ["localhost", "127.0.0.1", ""].includes(window.location.hostname)
-      && !["/community-priorities-map/", "/cluster-priorities-map/"].some((path) => window.location.pathname.includes(path));
+      && !PRIORITY_PHOTO_BASE_URL;
 
     window.CommunityPrioritiesAuth?.init({
       authApiBaseUrl: COMMUNITY_PRIORITIES_CONFIG.authApiBaseUrl,
@@ -14,12 +14,19 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     function resolveAssetUrl(path) {
       if (!path) return "";
       if (/^(https?:|file:|blob:|data:)/i.test(path)) return path;
-      const previewMatch = String(path).match(/(?:infrastructure_)?photo_previews\/([^/?#]+)/i);
+      let assetPath = String(path);
+      // ILDB asset popups use photo_index paths under photo_previews/, but infrastructure
+      // map builds only package the matching JPEGs in infrastructure_photo_previews/.
+      if (COMMUNITY_PRIORITIES_CONFIG.displayMode === "infrastructure"
+        && /(?:^|\/)photo_previews\//i.test(assetPath)) {
+        assetPath = assetPath.replace(/(^|\/)photo_previews\//i, "$1infrastructure_photo_previews/");
+      }
+      const previewMatch = assetPath.match(/(?:infrastructure_)?photo_previews\/([^/?#]+)/i);
       if (previewMatch) {
-        if (USE_LOCAL_PRIORITY_PHOTOS) return encodeURI(path).replace(/#/g, "%23");
+        if (USE_LOCAL_PRIORITY_PHOTOS) return encodeURI(assetPath).replace(/#/g, "%23");
         if (PRIORITY_PHOTO_BASE_URL) return PRIORITY_PHOTO_BASE_URL + previewMatch[1];
       }
-      return encodeURI(path).replace(/#/g, "%23");
+      return encodeURI(assetPath).replace(/#/g, "%23");
     }
 
     if (typeof window.photoPopupHtml === "function") {
@@ -169,8 +176,10 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     streets.addTo(map);
 
     const priorityGroup = L.layerGroup().addTo(map);
+    const priorityLabelGroup = IS_INFRASTRUCTURE_DISPLAY ? L.layerGroup().addTo(map) : null;
     const databaseStores = new Map();
     const markerById = new Map();
+    const priorityLabelById = new Map();
     const clusterFilter = document.getElementById("clusterFilter");
     const villageFilter = document.getElementById("villageFilter");
     const basemapFilter = document.getElementById("basemapFilter");
@@ -185,7 +194,11 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     const priorityLayerLabel = IS_INFRASTRUCTURE_DISPLAY
       ? "Infrastructure priorities"
       : "Photo-backed priorities";
+    const priorityLabelLayerName = "Priority intervention labels";
     const layerControlEntries = { [priorityLayerLabel]: priorityGroup };
+    if (priorityLabelGroup) {
+      layerControlEntries[priorityLabelLayerName] = priorityLabelGroup;
+    }
 
     function setSideIntroCollapsed(collapsed) {
       if (!sideIntroPanel || !sideHeaderToggle) return;
@@ -233,6 +246,19 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     const ZOOM_SHOW_PRIORITIES = 12;
     const ZOOM_SHOW_FACILITIES = 0;
     const ZOOM_SHOW_COMMUNITY_LABELS = 13;
+    const PRIORITY_LABEL_BASE_FONT_REM = 0.702;
+    const PRIORITY_LABEL_DEFAULT_WORDS_PER_LINE = 6;
+    const PRIORITY_LABEL_ZOOM_FULL = 17;
+    const PRIORITY_LABEL_MIN_ZOOM_SCALE = 0.5;
+    const PRIORITY_LABEL_MIN_OVERLAP_SCALE = 0.45;
+    const PRIORITY_LABEL_OVERLAP_PADDING_PX = 6;
+    const PRIORITY_LABEL_RESOLVE_ITERATIONS = 14;
+    const PRIORITY_LABEL_DEFAULT_LINE_HEIGHT = 1.2;
+    const priorityLabelUserAdjustments = {
+      sizeScale: 1,
+      wordsPerLine: PRIORITY_LABEL_DEFAULT_WORDS_PER_LINE,
+      lineHeight: PRIORITY_LABEL_DEFAULT_LINE_HEIGHT
+    };
     const DECLUTTER_GROUP_METERS = 14;
     const DECLUTTER_SPACING_PX = 48;
     const DUPLICATE_GPS_SPREAD_METERS = 20;
@@ -552,6 +578,14 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
         });
       }
 
+      if (priorityLabelGroup && map.hasLayer(priorityLabelGroup)) {
+        priorityLabelGroup.eachLayer((layer) => {
+          const tooltip = layer.getTooltip?.();
+          const el = tooltip?.getElement?.();
+          if (el) el.style.visibility = showPriorities ? "visible" : "hidden";
+        });
+      }
+
       databaseStores.forEach((store) => {
         if (store.entry.id === "boundary_community") {
           store.group.eachLayer((layer) => {
@@ -587,6 +621,226 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
         group.forEach((item, index) => {
           applyScreenOffset(item.marker, item.anchor, offsets[index].dx, offsets[index].dy);
         });
+      });
+      syncPriorityLabelPositions();
+      layoutPriorityLabels();
+      requestAnimationFrame(() => layoutPriorityLabels());
+    }
+
+    function priorityLabelZoomScale(zoom) {
+      if (zoom >= PRIORITY_LABEL_ZOOM_FULL) return 1;
+      if (zoom <= ZOOM_SHOW_PRIORITIES) return PRIORITY_LABEL_MIN_ZOOM_SCALE;
+      const progress = (zoom - ZOOM_SHOW_PRIORITIES) / (PRIORITY_LABEL_ZOOM_FULL - ZOOM_SHOW_PRIORITIES);
+      return PRIORITY_LABEL_MIN_ZOOM_SCALE + progress * (1 - PRIORITY_LABEL_MIN_ZOOM_SCALE);
+    }
+
+    function labelRectsOverlap(left, right, padding = PRIORITY_LABEL_OVERLAP_PADDING_PX) {
+      return !(left.right + padding < right.left
+        || left.left - padding > right.right
+        || left.bottom + padding < right.top
+        || left.top - padding > right.bottom);
+    }
+
+    function resetPriorityLabelScreenOffset(labelMarker) {
+      const anchor = labelMarker?._labelDeclutterAnchor;
+      if (!anchor || !labelMarker.setLatLng) return;
+      labelMarker.setLatLng(anchor);
+      labelMarker._labelPixelOffset = { dx: 0, dy: 0 };
+      labelMarker.getTooltip()?.update();
+    }
+
+    function applyPriorityLabelScreenOffset(labelMarker, anchor, dx, dy) {
+      if (!labelMarker || !anchor) return;
+      const point = map.latLngToContainerPoint(anchor);
+      const next = {
+        dx: (labelMarker._labelPixelOffset?.dx || 0) + dx,
+        dy: (labelMarker._labelPixelOffset?.dy || 0) + dy
+      };
+      labelMarker._labelPixelOffset = next;
+      labelMarker.setLatLng(map.containerPointToLatLng([
+        point.x + next.dx,
+        point.y + next.dy
+      ]));
+      labelMarker.getTooltip()?.update();
+    }
+
+    function groupPriorityLabelsByOverlap(entries) {
+      const parent = entries.map((_, index) => index);
+      function find(index) {
+        return parent[index] === index ? index : (parent[index] = find(parent[index]));
+      }
+      function union(a, b) {
+        parent[find(a)] = find(b);
+      }
+
+      for (let i = 0; i < entries.length; i += 1) {
+        for (let j = i + 1; j < entries.length; j += 1) {
+          if (labelRectsOverlap(entries[i].rect, entries[j].rect)) {
+            union(i, j);
+          }
+        }
+      }
+
+      const groups = new Map();
+      entries.forEach((entry, index) => {
+        const root = find(index);
+        if (!groups.has(root)) groups.set(root, []);
+        groups.get(root).push(entry);
+      });
+      return [...groups.values()];
+    }
+
+    function collectPriorityLabelEntries() {
+      const entries = [];
+      if (!priorityLabelGroup || !map.hasLayer(priorityLabelGroup)) return entries;
+
+      priorityLabelGroup.eachLayer((layer) => {
+        const tooltip = layer.getTooltip?.();
+        const element = tooltip?.getElement?.();
+        if (!element || element.style.visibility === "hidden") return;
+        const anchor = layer._labelDeclutterAnchor || layer.getLatLng?.();
+        if (!anchor) return;
+        entries.push({ layer, element, anchor, fontScale: 1, rect: null });
+      });
+      return entries;
+    }
+
+    function priorityLabelTextElement(tooltipElement) {
+      return tooltipElement?.querySelector(".priority-intervention-label-text") || tooltipElement;
+    }
+
+    function priorityLabelWrapWidthPx(fontSizeRem) {
+      const rootFontPx = parseFloat(getComputedStyle(document.documentElement).fontSize) || 16;
+      const fontPx = PRIORITY_LABEL_BASE_FONT_REM * fontSizeRem * rootFontPx;
+      const averageCharsPerWord = 6.2;
+      const averageCharWidth = fontPx * 0.52;
+      return Math.max(
+        48,
+        Math.round(priorityLabelUserAdjustments.wordsPerLine * averageCharsPerWord * averageCharWidth)
+      );
+    }
+
+    function priorityLabelTooltipHtml(text) {
+      return `<span class="priority-intervention-label-text">${escapeHtml(text)}</span>`;
+    }
+
+    function applyPriorityLabelScale(element, fontScale) {
+      const effectiveFontScale = fontScale * priorityLabelUserAdjustments.sizeScale;
+      const wrapWidthPx = priorityLabelWrapWidthPx(effectiveFontScale);
+      const textElement = priorityLabelTextElement(element);
+
+      element.style.setProperty("--priority-label-scale", String(effectiveFontScale));
+      element.style.width = `${wrapWidthPx}px`;
+      element.style.maxWidth = `${wrapWidthPx}px`;
+      element.style.boxSizing = "border-box";
+      element.style.textAlign = "center";
+
+      textElement.style.fontSize = `${PRIORITY_LABEL_BASE_FONT_REM * effectiveFontScale}rem`;
+      textElement.style.lineHeight = String(priorityLabelUserAdjustments.lineHeight);
+      textElement.style.width = "100%";
+      textElement.style.maxWidth = "100%";
+      textElement.style.display = "block";
+      textElement.style.boxSizing = "border-box";
+      textElement.style.textAlign = "center";
+    }
+
+    function updatePriorityLabelTooltips() {
+      if (!priorityLabelGroup) return;
+      priorityLabelGroup.eachLayer((layer) => {
+        layer.getTooltip()?.update();
+      });
+    }
+
+    function refreshPriorityLabelLayout() {
+      layoutPriorityLabels();
+      requestAnimationFrame(() => {
+        layoutPriorityLabels();
+        updatePriorityLabelTooltips();
+      });
+    }
+
+    function measurePriorityLabelEntries(entries) {
+      entries.forEach((entry) => {
+        entry.rect = entry.element.getBoundingClientRect();
+      });
+      return entries.filter((entry) => entry.rect.width > 0 && entry.rect.height > 0);
+    }
+
+    function layoutPriorityLabels() {
+      if (!priorityLabelGroup || !map.hasLayer(priorityLabelGroup)) return;
+
+      const zoom = map.getZoom();
+      if (zoom < ZOOM_SHOW_PRIORITIES) return;
+
+      const zoomScale = priorityLabelZoomScale(zoom);
+      const minFontScale = PRIORITY_LABEL_MIN_OVERLAP_SCALE * zoomScale;
+      const entries = collectPriorityLabelEntries();
+      if (!entries.length) return;
+
+      entries.forEach((entry) => {
+        entry.fontScale = zoomScale;
+        resetPriorityLabelScreenOffset(entry.layer);
+        applyPriorityLabelScale(entry.element, entry.fontScale);
+      });
+
+      for (let iteration = 0; iteration < PRIORITY_LABEL_RESOLVE_ITERATIONS; iteration += 1) {
+        const measured = measurePriorityLabelEntries(entries);
+        if (!measured.length) return;
+
+        const groups = groupPriorityLabelsByOverlap(measured);
+        const overlappingGroups = groups.filter((group) => group.length > 1);
+        if (!overlappingGroups.length) break;
+
+        overlappingGroups.forEach((group) => {
+          group.forEach((entry) => {
+            entry.fontScale = Math.max(minFontScale, entry.fontScale * 0.94);
+            applyPriorityLabelScale(entry.element, entry.fontScale);
+          });
+          measurePriorityLabelEntries(group);
+
+          group.forEach((entry, index) => {
+            for (let peer = index + 1; peer < group.length; peer += 1) {
+              const other = group[peer];
+              if (!labelRectsOverlap(entry.rect, other.rect)) continue;
+
+              const overlapY = Math.min(entry.rect.bottom, other.rect.bottom)
+                - Math.max(entry.rect.top, other.rect.top);
+              const overlapX = Math.min(entry.rect.right, other.rect.right)
+                - Math.max(entry.rect.left, other.rect.left);
+              const pushY = overlapY > 0
+                ? (overlapY / 2) + PRIORITY_LABEL_OVERLAP_PADDING_PX
+                : 0;
+              const pushX = overlapX > 0
+                ? (overlapX / 2) + PRIORITY_LABEL_OVERLAP_PADDING_PX
+                : 0;
+
+              if (pushY >= pushX && pushY > 0) {
+                applyPriorityLabelScreenOffset(other.layer, other.anchor, 0, pushY);
+                applyPriorityLabelScreenOffset(entry.layer, entry.anchor, 0, -pushY);
+              } else if (pushX > 0) {
+                applyPriorityLabelScreenOffset(other.layer, other.anchor, pushX, 0);
+                applyPriorityLabelScreenOffset(entry.layer, entry.anchor, -pushX, 0);
+              }
+
+              entry.rect = entry.element.getBoundingClientRect();
+              other.rect = other.element.getBoundingClientRect();
+            }
+          });
+        });
+      }
+
+      updatePriorityLabelTooltips();
+    }
+
+    function syncPriorityLabelPositions() {
+      if (!priorityLabelGroup || !map.hasLayer(priorityLabelGroup)) return;
+      priorityLabelById.forEach((labelMarker, pointId) => {
+        const marker = markerById.get(pointId);
+        if (!marker?.getLatLng || !labelMarker?.setLatLng) return;
+        const anchor = marker.getLatLng();
+        labelMarker.setLatLng(anchor);
+        labelMarker._labelDeclutterAnchor = anchor;
+        labelMarker._labelPixelOffset = { dx: 0, dy: 0 };
       });
     }
 
@@ -895,7 +1149,8 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
         [
           "Cluster boundaries",
           "Community boundaries",
-          priorityLayerLabel
+          priorityLayerLabel,
+          priorityLabelLayerName
         ].forEach((label) => {
           if (layerControlEntries[label]) ordered[label] = layerControlEntries[label];
         });
@@ -1190,6 +1445,61 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       });
     }
 
+    const PRIORITY_LABEL_ICON = L.divIcon({
+      className: "priority-label-anchor",
+      iconSize: [0, 0],
+      iconAnchor: [0, 0]
+    });
+
+    function priorityInterventionText(point) {
+      return String(point.intervention || point.title || "").trim();
+    }
+
+    function priorityLabelTooltipOptions() {
+      return {
+        permanent: true,
+        direction: "bottom",
+        offset: [0, 22],
+        className: "priority-intervention-label",
+        opacity: 1
+      };
+    }
+
+    function renderPriorityLabels(points) {
+      if (!priorityLabelGroup) return;
+      priorityLabelGroup.clearLayers();
+      points.forEach((point) => {
+        const text = priorityInterventionText(point);
+        if (!text) return;
+
+        let labelMarker = priorityLabelById.get(point.id);
+        const latlng = markerLatLng(point);
+        if (!labelMarker) {
+          labelMarker = L.marker(latlng, {
+            icon: PRIORITY_LABEL_ICON,
+            interactive: false,
+            keyboard: false,
+            zIndexOffset: 800 + point.id
+          });
+          labelMarker.bindTooltip(priorityLabelTooltipHtml(text), priorityLabelTooltipOptions());
+          priorityLabelById.set(point.id, labelMarker);
+        } else {
+          labelMarker.setLatLng(latlng);
+          const tooltip = labelMarker.getTooltip();
+          if (tooltip) {
+            tooltip.setContent(priorityLabelTooltipHtml(text));
+            Object.assign(tooltip.options, priorityLabelTooltipOptions());
+            tooltip.update();
+          }
+        }
+        const tooltipElement = labelMarker.getTooltip()?.getElement?.();
+        if (tooltipElement) {
+          applyPriorityLabelScale(tooltipElement, priorityLabelZoomScale(map.getZoom()));
+        }
+        labelMarker.addTo(priorityLabelGroup);
+      });
+    }
+
     function renderPriorityMarkers(points) {
       assignDuplicateGpsSpread(points);
       priorityGroup.clearLayers();
@@ -1311,6 +1621,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       databaseStores.forEach((store) => rebuildDatabaseLayer(store.entry));
       const points = filteredPriorityPoints();
       renderPriorityMarkers(points);
+      renderPriorityLabels(points);
       renderPriorityCards(points);
       updateStoryText();
       filterSummary.textContent = IS_INFRASTRUCTURE_DISPLAY
@@ -1505,40 +1816,99 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
 
       const zoom = map.getZoom();
       const entry = store.entry;
+      const bounds = map.getBounds();
 
       if (entry.geometry === "point" && zoom < ZOOM_SHOW_FACILITIES) {
         return false;
       }
 
-      if (entry.geometry !== "point") {
-        return true;
-      }
-
-      let hasVisibleMarker = false;
+      let hasVisibleFeature = false;
       store.group.eachLayer((layer) => {
-        if (hasVisibleMarker) return;
-        const element = layer.getElement?.();
-        if (element) {
-          const opacity = Number.parseFloat(element.style.opacity || "1");
-          if (opacity > 0) hasVisibleMarker = true;
+        if (hasVisibleFeature) return;
+
+        if (entry.geometry === "point") {
+          const element = layer.getElement?.();
+          if (element) {
+            const opacity = Number.parseFloat(element.style.opacity || "1");
+            if (opacity <= 0) return;
+          } else if ((layer.options?.opacity ?? 1) <= 0) {
+            return;
+          }
+          const latlng = layer.getLatLng?.();
+          if (latlng && bounds.contains(latlng)) {
+            hasVisibleFeature = true;
+          }
           return;
         }
-        if ((layer.options?.opacity ?? 1) > 0) {
-          hasVisibleMarker = true;
+
+        const layerBounds = layer.getBounds?.();
+        if (layerBounds?.isValid?.() && bounds.intersects(layerBounds)) {
+          hasVisibleFeature = true;
         }
       });
-      return hasVisibleMarker;
+      return hasVisibleFeature;
     }
 
     function isPriorityLayerRenderedOnMap() {
       if (!map.hasLayer(priorityGroup) || map.getZoom() < ZOOM_SHOW_PRIORITIES) {
         return false;
       }
-      return filteredPriorityPoints().length > 0;
+      const bounds = map.getBounds();
+      return filteredPriorityPoints().some((point) => bounds.contains(markerLatLng(point)));
+    }
+
+    function isBoundaryLayerInLegend(store) {
+      return Boolean(store && map.hasLayer(store.group) && (store.visibleCount || 0) > 0);
+    }
+
+    function buildDatabaseLegendItem(entry) {
+      const style = styleForLayer(entry.id);
+      const item = {
+        label: entry.label,
+        type: entry.geometry,
+        strokeColor: style.strokeColor,
+        fillColor: style.fillColor || style.markerFill,
+        strokeWidth: style.strokeWidth || 2,
+        fillOpacity: 0.35,
+        iconUrl: style.icon ? resolveAssetUrl(style.icon) : null
+      };
+
+      if (entry.id === "boundary_cluster") {
+        item.type = "polygon";
+        item.fillColor = style.fillColor || "#e9ffbe";
+        item.strokeColor = style.strokeColor || "#002673";
+        item.fillOpacity = style.fillOpacity ?? 0.35;
+      } else if (entry.id === "boundary_community") {
+        item.type = "polygon";
+        item.fillColor = style.fillColor || "#259070";
+        item.strokeColor = style.strokeColor || "#cccccc";
+        item.fillOpacity = 0;
+      } else if (entry.geometry === "line") {
+        item.type = "line";
+        item.strokeColor = style.strokeColor || "#666666";
+        item.strokeWidth = style.strokeWidth || 2;
+      } else if (entry.geometry === "point") {
+        item.type = style.icon ? "icon" : "point";
+        item.fillColor = style.fillColor || style.markerFill || "#333333";
+        item.strokeColor = style.strokeColor || "#ffffff";
+      }
+
+      return item;
     }
 
     function buildExportLegendItems() {
       const items = [];
+      const boundaryOrder = ["boundary_cluster", "boundary_community"];
+      const entries = databaseManifestEntries();
+      const entriesById = new Map(entries.map((entry) => [entry.id, entry]));
+
+      boundaryOrder.forEach((layerId) => {
+        const entry = entriesById.get(layerId);
+        if (!entry) return;
+        const store = databaseStores.get(layerId);
+        if (!isBoundaryLayerInLegend(store)) return;
+        items.push(buildDatabaseLegendItem(entry));
+      });
 
       if (isPriorityLayerRenderedOnMap()) {
         items.push({
@@ -1549,42 +1919,11 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
         });
       }
 
-      databaseManifestEntries().forEach((entry) => {
+      entries.forEach((entry) => {
+        if (boundaryOrder.includes(entry.id)) return;
         const store = databaseStores.get(entry.id);
         if (!isLayerRenderedOnMap(store)) return;
-
-        const style = styleForLayer(entry.id);
-        const item = {
-          label: entry.label,
-          type: entry.geometry,
-          strokeColor: style.strokeColor,
-          fillColor: style.fillColor || style.markerFill,
-          strokeWidth: style.strokeWidth || 2,
-          fillOpacity: 0.35,
-          iconUrl: style.icon ? resolveAssetUrl(style.icon) : null
-        };
-
-        if (entry.id === "boundary_cluster") {
-          item.type = "polygon";
-          item.fillColor = style.fillColor || "#e9ffbe";
-          item.strokeColor = style.strokeColor || "#002673";
-          item.fillOpacity = style.fillOpacity ?? 0.35;
-        } else if (entry.id === "boundary_community") {
-          item.type = "polygon";
-          item.fillColor = style.fillColor || "#259070";
-          item.strokeColor = style.strokeColor || "#cccccc";
-          item.fillOpacity = 0;
-        } else if (entry.geometry === "line") {
-          item.type = "line";
-          item.strokeColor = style.strokeColor || "#666666";
-          item.strokeWidth = style.strokeWidth || 2;
-        } else if (entry.geometry === "point") {
-          item.type = style.icon ? "icon" : "point";
-          item.fillColor = style.fillColor || style.markerFill || "#333333";
-          item.strokeColor = style.strokeColor || "#ffffff";
-        }
-
-        items.push(item);
+        items.push(buildDatabaseLegendItem(entry));
       });
 
       return items;
@@ -1607,6 +1946,46 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       subtitleInput.value = defaultExportSubtitle();
     }
 
+    function initPriorityLabelAdjustControls() {
+      const section = document.getElementById("priorityLabelAdjustFields");
+      if (!section || !IS_INFRASTRUCTURE_DISPLAY || !priorityLabelGroup) return;
+
+      section.hidden = false;
+
+      const sizeSlider = document.getElementById("priorityLabelSizeSlider");
+      const widthSlider = document.getElementById("priorityLabelWidthSlider");
+      const heightSlider = document.getElementById("priorityLabelHeightSlider");
+      const sizeValue = document.getElementById("priorityLabelSizeValue");
+      const widthValue = document.getElementById("priorityLabelWidthValue");
+      const heightValue = document.getElementById("priorityLabelHeightValue");
+      if (!sizeSlider || !widthSlider || !heightSlider) return;
+
+      sizeSlider.value = String(Math.round(priorityLabelUserAdjustments.sizeScale * 100));
+      widthSlider.value = String(priorityLabelUserAdjustments.wordsPerLine);
+      heightSlider.value = String(Math.round(priorityLabelUserAdjustments.lineHeight * 100));
+      if (sizeValue) sizeValue.textContent = `${sizeSlider.value}%`;
+      if (widthValue) widthValue.textContent = widthSlider.value;
+      if (heightValue) heightValue.textContent = (Number(heightSlider.value) / 100).toFixed(1);
+
+      sizeSlider.addEventListener("input", () => {
+        priorityLabelUserAdjustments.sizeScale = Number(sizeSlider.value) / 100;
+        if (sizeValue) sizeValue.textContent = `${sizeSlider.value}%`;
+        refreshPriorityLabelLayout();
+      });
+
+      widthSlider.addEventListener("input", () => {
+        priorityLabelUserAdjustments.wordsPerLine = Number(widthSlider.value);
+        if (widthValue) widthValue.textContent = widthSlider.value;
+        refreshPriorityLabelLayout();
+      });
+
+      heightSlider.addEventListener("input", () => {
+        priorityLabelUserAdjustments.lineHeight = Number(heightSlider.value) / 100;
+        if (heightValue) heightValue.textContent = priorityLabelUserAdjustments.lineHeight.toFixed(1);
+        refreshPriorityLabelLayout();
+      });
+    }
+
     function prepareExportPanel() {
       const titleInput = document.getElementById("exportTitleInput");
       const subtitleInput = document.getElementById("exportSubtitleInput");
@@ -1615,6 +1994,9 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       }
       if (subtitleInput && subtitleInput.dataset.userEdited !== "true") {
         subtitleInput.value = defaultExportSubtitle();
+      }
+      if (IS_INFRASTRUCTURE_DISPLAY && priorityLabelGroup) {
+        refreshPriorityLabelLayout();
       }
     }
 
@@ -1625,6 +2007,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       subtitleInput?.addEventListener("input", () => {
         subtitleInput.dataset.userEdited = "true";
       });
+      initPriorityLabelAdjustControls();
     }
 
     function buildExportMetadata() {
@@ -1638,7 +2021,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       return {
         title: titleInput?.value?.trim() || defaultExportTitle(),
         subtitle: subtitleInput?.value?.trim() || defaultExportSubtitle(),
-        quality: qualityInput?.value || "medium",
+        quality: qualityInput?.value || "high",
         basemap: basemapFilter?.value || DEFAULT_BASE_MAP,
         mapScaleLat: bounds.getSouth(),
         mapZoom: map.getZoom(),

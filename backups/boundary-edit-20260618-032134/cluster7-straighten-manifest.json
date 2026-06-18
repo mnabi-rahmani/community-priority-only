@@ -1,0 +1,21 @@
+{
+  "status": "ok",
+  "snapshot_gdb": "C:\\Everything\\Documents\\Projects\\Community Priorities Only\\backups\\boundary-edit-20260618-032134\\Cluster7_pre_straighten_backup.gdb",
+  "cluster": {
+    "name": "Cluster 7",
+    "objectid": 29,
+    "part_count": 1,
+    "method": "base_plus_village_plus_straight_corridor"
+  },
+  "village": {
+    "name": "Temoryan Bala",
+    "objectid": 78,
+    "part_count": 1,
+    "method": "original_plus_straight_corridor"
+  },
+  "priority": {
+    "lon": 68.8676,
+    "lat": 36.3058,
+    "label": "Cluster 7 priority #1"
+  }
+}

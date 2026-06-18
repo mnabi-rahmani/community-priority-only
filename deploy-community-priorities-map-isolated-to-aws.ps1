@@ -210,6 +210,7 @@ window.COMMUNITY_PRIORITIES_CONFIG = {
   areaPhotosGlobal: "INFRASTRUCTURE_AREA_PHOTOS",
   areaPhotoRadiusMeters: 100,
   mapId: "cluster-priorities-only",
+  enableMapExport: true,
   includedLayerIds: ["boundary_cluster", "boundary_community"],
   navItems: [
     {
@@ -245,6 +246,7 @@ window.COMMUNITY_PRIORITIES_CONFIG = {
   areaPhotosGlobal: "INFRASTRUCTURE_AREA_PHOTOS",
   areaPhotoRadiusMeters: 100,
   mapId: "cluster-priorities-and-assets",
+  enableMapExport: true,
   includedLayerIds: [
     "boundary_cluster",
     "boundary_community",

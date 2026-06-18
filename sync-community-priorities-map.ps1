@@ -79,5 +79,9 @@ if (Test-Path $iconsSource) {
     Copy-Item $iconsSource (Join-Path $targetDataDir "icons") -Recurse -Force
 }
 
+$previewSource = Join-Path $DataDir "photo_previews"
+if (Test-Path $previewSource) {
+    Copy-Item $previewSource (Join-Path $targetDataDir "photo_previews") -Recurse -Force
+}
+
 Write-Host "Done. Community priorities map packaged into frontend/dist/community-priorities-map."
-Write-Host "Photo previews were intentionally excluded; deploy them separately with deploy-community-priorities-map-assets-to-s3.ps1."

@@ -4,8 +4,8 @@
   "private": true,
   "description": "Community Priorities and Cluster Priorities Leaflet maps",
   "scripts": {
-    "dev": "serve dist -l 5173",
-    "preview": "serve dist -l 5173",
+    "dev": "serve dist -l 5173 --no-port-switching",
+    "preview": "serve dist -l 5173 --no-port-switching",
     "sync:priorities": "powershell -NoProfile -ExecutionPolicy Bypass -File ../sync-community-priorities-map.ps1",
     "sync:cluster-priorities": "powershell -NoProfile -ExecutionPolicy Bypass -File ../sync-cluster-priorities-map.ps1",
     "sync:cluster-priorities-assets": "powershell -NoProfile -ExecutionPolicy Bypass -File ../sync-cluster-priorities-assets-map.ps1",

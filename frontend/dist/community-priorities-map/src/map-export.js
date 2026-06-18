@@ -1,7 +1,11 @@
 (function initCommunityPrioritiesMapExport(global) {
   const TILE_WAIT_MS = 15000;
   const TILE_POLL_MS = 150;
-  const LEGEND_SCALE = 1.5;
+  const NORTH_ARROW_SCALE = 2;
+  const SCALE_BAR_SCALE = 2.25;
+  const LEGEND_SCALE = 2.25;
+  const TITLE_FONT_SIZE = 60;
+  const SUBTITLE_FONT_SIZE = 34;
   const LEGEND_SYMBOL_SIZE = 18 * LEGEND_SCALE;
   const LEGEND_ROW_HEIGHT = 22 * LEGEND_SCALE;
   const LEGEND_PADDING = 10 * LEGEND_SCALE;
@@ -16,6 +20,127 @@
     medium: 2,
     low: 1
   };
+
+  const DARK_BASEMAPS = new Set([
+    "Satellite imagery",
+    "Satellite + labels"
+  ]);
+
+  const MAP_DECORATION_MARGIN = 28 * Math.max(NORTH_ARROW_SCALE, SCALE_BAR_SCALE, LEGEND_SCALE);
+  const SCALE_BAR_MAX_WIDTH = 320 * SCALE_BAR_SCALE;
+
+  function decorationColor(basemap) {
+    return DARK_BASEMAPS.has(basemap) ? "#ffffff" : "#17201e";
+  }
+
+  function metersPerMapPixel(latitude, zoom) {
+    return 156543.03392 * Math.cos((latitude * Math.PI) / 180) / Math.pow(2, zoom);
+  }
+
+  function pickNiceScaleDistance(maxMeters) {
+    const candidates = [
+      10, 20, 50, 100, 200, 250, 500, 750,
+      1000, 1500, 2000, 2500, 3000, 5000, 7500,
+      10000, 15000, 20000, 25000, 50000, 75000, 100000
+    ];
+    for (let index = candidates.length - 1; index >= 0; index -= 1) {
+      if (candidates[index] <= maxMeters * 0.92) return candidates[index];
+    }
+    return candidates[0];
+  }
+
+  function formatScaleLabel(meters, isLast) {
+    if (meters >= 1000) {
+      const km = meters / 1000;
+      const text = Number.isInteger(km)
+        ? String(km)
+        : km.toFixed(km < 10 ? 2 : 1).replace(/\.?0+$/, "");
+      return isLast ? `${text} Kilometers` : text;
+    }
+    return isLast ? `${meters} Meters` : String(meters);
+  }
+
+  function buildScaleBarSpec(metadata, canvasWidth, captureScale) {
+    const maxBarPx = Math.min(SCALE_BAR_MAX_WIDTH, canvasWidth * 0.32);
+    const metersPerPx = metersPerMapPixel(metadata.mapScaleLat, metadata.mapZoom) / captureScale;
+    const totalMeters = pickNiceScaleDistance(maxBarPx * metersPerPx);
+    const barWidthPx = totalMeters / metersPerPx;
+    return { totalMeters, barWidthPx, segments: 4 };
+  }
+
+  function legendBlockHeight(items) {
+    if (!items.length) return 0;
+    return LEGEND_PADDING * 2 + LEGEND_HEADER_HEIGHT + items.length * LEGEND_ROW_HEIGHT;
+  }
+
+  function scaleBarBlockHeight() {
+    return 48 * SCALE_BAR_SCALE;
+  }
+
+  function drawNorthArrow(ctx, rightX, topY, color) {
+    const arrowWidth = 24 * NORTH_ARROW_SCALE;
+    const arrowHeight = 30 * NORTH_ARROW_SCALE;
+    const centerX = rightX - arrowWidth / 2;
+
+    ctx.save();
+    ctx.fillStyle = color;
+    ctx.strokeStyle = color;
+    ctx.font = `700 ${Math.round(17 * NORTH_ARROW_SCALE)}px Georgia, "Times New Roman", serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "bottom";
+    ctx.fillText("N", centerX, topY + 16 * NORTH_ARROW_SCALE);
+
+    const tipY = topY + 20 * NORTH_ARROW_SCALE;
+    const baseY = tipY + arrowHeight;
+    ctx.beginPath();
+    ctx.moveTo(centerX, tipY);
+    ctx.lineTo(centerX - arrowWidth / 2, baseY);
+    ctx.lineTo(centerX + arrowWidth / 2, baseY);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+
+  function drawScaleBar(ctx, leftX, topY, spec, color) {
+    const { totalMeters, barWidthPx, segments } = spec;
+    const lineY = topY + 10 * SCALE_BAR_SCALE;
+    const endTickHeight = 16 * SCALE_BAR_SCALE;
+    const midTickHeight = 10 * SCALE_BAR_SCALE;
+    const labelY = lineY + 18 * SCALE_BAR_SCALE;
+    const fontSize = Math.round(14 * SCALE_BAR_SCALE);
+
+    ctx.save();
+    ctx.strokeStyle = color;
+    ctx.fillStyle = color;
+    ctx.lineWidth = 2.5;
+    ctx.lineCap = "square";
+
+    ctx.beginPath();
+    ctx.moveTo(leftX, lineY);
+    ctx.lineTo(leftX + barWidthPx, lineY);
+    ctx.stroke();
+
+    for (let index = 0; index <= segments; index += 1) {
+      const tickX = leftX + (barWidthPx / segments) * index;
+      const tickHeight = index === 0 || index === segments ? endTickHeight : midTickHeight;
+      ctx.beginPath();
+      ctx.moveTo(tickX, lineY);
+      ctx.lineTo(tickX, lineY + tickHeight);
+      ctx.stroke();
+    }
+
+    ctx.font = `600 ${fontSize}px Arial, Helvetica, sans-serif`;
+    ctx.textAlign = "center";
+    ctx.textBaseline = "top";
+    for (let index = 0; index <= segments; index += 1) {
+      const tickX = leftX + (barWidthPx / segments) * index;
+      const meters = (totalMeters / segments) * index;
+      const label = formatScaleLabel(meters, index === segments);
+      ctx.fillText(label, tickX, labelY);
+    }
+
+    ctx.restore();
+  }
 
   function slugify(value) {
     return String(value || "all")
@@ -35,7 +160,7 @@
   }
 
   function resolveExportScale(metadata) {
-    return QUALITY_SCALES[metadata.quality] || QUALITY_SCALES.medium;
+    return QUALITY_SCALES[metadata.quality] || QUALITY_SCALES.high;
   }
 
   function setExportStatus(statusEl, message, isError = false) {
@@ -238,13 +363,11 @@
     ctx.restore();
   }
 
-  function drawArcGisLegend(ctx, mapX, mapY, mapWidth, mapHeight, items) {
+  function drawArcGisLegend(ctx, legendX, legendY, items) {
     if (!items.length) return;
 
     const legendWidth = measureLegendWidth(ctx, items);
-    const legendHeight = LEGEND_PADDING * 2 + LEGEND_HEADER_HEIGHT + items.length * LEGEND_ROW_HEIGHT;
-    const legendX = mapX + mapWidth - legendWidth - 14 * LEGEND_SCALE;
-    const legendY = mapY + mapHeight - legendHeight - 14 * LEGEND_SCALE;
+    const legendHeight = legendBlockHeight(items);
 
     ctx.save();
     ctx.fillStyle = "rgba(255, 255, 255, 0.96)";
@@ -275,19 +398,40 @@
     ctx.restore();
   }
 
-  function compositeMapWithLegend(mapCanvas, legendItems) {
+  function compositeMapWithDecorations(mapCanvas, legendItems, metadata, captureScale) {
     const composite = document.createElement("canvas");
     composite.width = mapCanvas.width;
     composite.height = mapCanvas.height;
     const ctx = composite.getContext("2d");
     ctx.drawImage(mapCanvas, 0, 0);
-    drawArcGisLegend(ctx, 0, 0, composite.width, composite.height, legendItems);
+
+    const color = decorationColor(metadata.basemap);
+    const mapWidth = composite.width;
+    const mapHeight = composite.height;
+    const margin = MAP_DECORATION_MARGIN;
+
+    drawNorthArrow(ctx, mapWidth - margin, margin, color);
+
+    const scaleSpec = buildScaleBarSpec(metadata, mapWidth, captureScale);
+    const scaleHeight = scaleBarBlockHeight();
+    const scaleTop = mapHeight - margin - scaleHeight;
+    const scaleLeft = margin;
+    drawScaleBar(ctx, scaleLeft, scaleTop, scaleSpec, color);
+
+    if (legendItems.length) {
+      const legendWidth = measureLegendWidth(ctx, legendItems);
+      const legendHeight = legendBlockHeight(legendItems);
+      const legendX = mapWidth - margin - legendWidth;
+      const legendY = mapHeight - margin - legendHeight;
+      drawArcGisLegend(ctx, legendX, legendY, legendItems);
+    }
+
     return composite;
   }
 
   function buildFramedCanvas(mapCanvas, metadata) {
     const padding = 48;
-    const headerHeight = 78;
+    const headerHeight = TITLE_FONT_SIZE + 12 + SUBTITLE_FONT_SIZE + 24;
     const footerHeight = 44;
     const framed = document.createElement("canvas");
     framed.width = mapCanvas.width + padding * 2;
@@ -298,12 +442,12 @@
     ctx.fillRect(0, 0, framed.width, framed.height);
 
     ctx.fillStyle = "#17201e";
-    ctx.font = "700 30px Arial, Helvetica, sans-serif";
-    ctx.fillText(metadata.title, padding, padding + 30);
+    ctx.font = `700 ${TITLE_FONT_SIZE}px Arial, Helvetica, sans-serif`;
+    ctx.fillText(metadata.title, padding, padding + TITLE_FONT_SIZE);
 
     ctx.fillStyle = "#5b6764";
-    ctx.font = "600 17px Arial, Helvetica, sans-serif";
-    ctx.fillText(metadata.subtitle, padding, padding + 58);
+    ctx.font = `600 ${SUBTITLE_FONT_SIZE}px Arial, Helvetica, sans-serif`;
+    ctx.fillText(metadata.subtitle, padding, padding + TITLE_FONT_SIZE + 12 + SUBTITLE_FONT_SIZE);
 
     const mapY = padding + headerHeight;
     ctx.strokeStyle = "#d8dfda";
@@ -348,11 +492,11 @@
 
   async function buildExportCanvas(map, getMetadata) {
     const metadata = getMetadata();
-    const scale = resolveExportScale(metadata);
+    const captureScale = resolveExportScale(metadata);
     const legendItems = await preloadLegendIcons(metadata.legendItems || []);
-    const mapCanvas = await captureMapCanvas(map, scale);
-    const mapWithLegend = compositeMapWithLegend(mapCanvas, legendItems);
-    return buildFramedCanvas(mapWithLegend, metadata);
+    const mapCanvas = await captureMapCanvas(map, captureScale);
+    const mapWithDecorations = compositeMapWithDecorations(mapCanvas, legendItems, metadata, captureScale);
+    return buildFramedCanvas(mapWithDecorations, metadata);
   }
 
   async function exportPng(map, getMetadata) {
@@ -370,24 +514,20 @@
     const framedCanvas = await buildExportCanvas(map, getMetadata);
     const imageData = framedCanvas.toDataURL("image/png");
 
+    const margin = 6;
+    const pxToPt = 72 / 96;
+    const renderWidth = framedCanvas.width * pxToPt;
+    const renderHeight = framedCanvas.height * pxToPt;
+    const pageWidth = renderWidth + margin * 2;
+    const pageHeight = renderHeight + margin * 2;
+
     const pdf = new global.jspdf.jsPDF({
-      orientation: framedCanvas.width >= framedCanvas.height ? "landscape" : "portrait",
       unit: "pt",
-      format: "a4"
+      format: [pageWidth, pageHeight],
+      orientation: pageWidth >= pageHeight ? "landscape" : "portrait"
     });
 
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 24;
-    const maxWidth = pageWidth - margin * 2;
-    const maxHeight = pageHeight - margin * 2;
-    const scale = Math.min(maxWidth / framedCanvas.width, maxHeight / framedCanvas.height);
-    const renderWidth = framedCanvas.width * scale;
-    const renderHeight = framedCanvas.height * scale;
-    const offsetX = (pageWidth - renderWidth) / 2;
-    const offsetY = (pageHeight - renderHeight) / 2;
-
-    pdf.addImage(imageData, "PNG", offsetX, offsetY, renderWidth, renderHeight, undefined, "FAST");
+    pdf.addImage(imageData, "PNG", margin, margin, renderWidth, renderHeight, undefined, "FAST");
     pdf.save(buildFilename(metadata, "pdf"));
   }
 

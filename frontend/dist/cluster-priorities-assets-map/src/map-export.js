@@ -1,7 +1,11 @@
 (function initCommunityPrioritiesMapExport(global) {
   const TILE_WAIT_MS = 15000;
   const TILE_POLL_MS = 150;
-  const LEGEND_SCALE = 1.5;
+  const NORTH_ARROW_SCALE = 2;
+  const SCALE_BAR_SCALE = 2.25;
+  const LEGEND_SCALE = 2.25;
+  const TITLE_FONT_SIZE = 60;
+  const SUBTITLE_FONT_SIZE = 34;
   const LEGEND_SYMBOL_SIZE = 18 * LEGEND_SCALE;
   const LEGEND_ROW_HEIGHT = 22 * LEGEND_SCALE;
   const LEGEND_PADDING = 10 * LEGEND_SCALE;
@@ -22,7 +26,8 @@
     "Satellite + labels"
   ]);
 
-  const MAP_DECORATION_MARGIN = 14 * LEGEND_SCALE;
+  const MAP_DECORATION_MARGIN = 28 * Math.max(NORTH_ARROW_SCALE, SCALE_BAR_SCALE, LEGEND_SCALE);
+  const SCALE_BAR_MAX_WIDTH = 320 * SCALE_BAR_SCALE;
 
   function decorationColor(basemap) {
     return DARK_BASEMAPS.has(basemap) ? "#ffffff" : "#17201e";
@@ -56,7 +61,7 @@
   }
 
   function buildScaleBarSpec(metadata, canvasWidth, captureScale) {
-    const maxBarPx = Math.min(220 * LEGEND_SCALE, canvasWidth * 0.24);
+    const maxBarPx = Math.min(SCALE_BAR_MAX_WIDTH, canvasWidth * 0.32);
     const metersPerPx = metersPerMapPixel(metadata.mapScaleLat, metadata.mapZoom) / captureScale;
     const totalMeters = pickNiceScaleDistance(maxBarPx * metersPerPx);
     const barWidthPx = totalMeters / metersPerPx;
@@ -69,23 +74,23 @@
   }
 
   function scaleBarBlockHeight() {
-    return 34 * LEGEND_SCALE;
+    return 48 * SCALE_BAR_SCALE;
   }
 
   function drawNorthArrow(ctx, rightX, topY, color) {
-    const arrowWidth = 24 * LEGEND_SCALE;
-    const arrowHeight = 30 * LEGEND_SCALE;
+    const arrowWidth = 24 * NORTH_ARROW_SCALE;
+    const arrowHeight = 30 * NORTH_ARROW_SCALE;
     const centerX = rightX - arrowWidth / 2;
 
     ctx.save();
     ctx.fillStyle = color;
     ctx.strokeStyle = color;
-    ctx.font = `700 ${Math.round(17 * LEGEND_SCALE)}px Georgia, "Times New Roman", serif`;
+    ctx.font = `700 ${Math.round(17 * NORTH_ARROW_SCALE)}px Georgia, "Times New Roman", serif`;
     ctx.textAlign = "center";
     ctx.textBaseline = "bottom";
-    ctx.fillText("N", centerX, topY + 16 * LEGEND_SCALE);
+    ctx.fillText("N", centerX, topY + 16 * NORTH_ARROW_SCALE);
 
-    const tipY = topY + 20 * LEGEND_SCALE;
+    const tipY = topY + 20 * NORTH_ARROW_SCALE;
     const baseY = tipY + arrowHeight;
     ctx.beginPath();
     ctx.moveTo(centerX, tipY);
@@ -98,16 +103,16 @@
 
   function drawScaleBar(ctx, leftX, topY, spec, color) {
     const { totalMeters, barWidthPx, segments } = spec;
-    const lineY = topY + 8 * LEGEND_SCALE;
-    const endTickHeight = 10 * LEGEND_SCALE;
-    const midTickHeight = 6 * LEGEND_SCALE;
-    const labelY = lineY + 14 * LEGEND_SCALE;
-    const fontSize = Math.round(11 * LEGEND_SCALE);
+    const lineY = topY + 10 * SCALE_BAR_SCALE;
+    const endTickHeight = 16 * SCALE_BAR_SCALE;
+    const midTickHeight = 10 * SCALE_BAR_SCALE;
+    const labelY = lineY + 18 * SCALE_BAR_SCALE;
+    const fontSize = Math.round(14 * SCALE_BAR_SCALE);
 
     ctx.save();
     ctx.strokeStyle = color;
     ctx.fillStyle = color;
-    ctx.lineWidth = 2;
+    ctx.lineWidth = 2.5;
     ctx.lineCap = "square";
 
     ctx.beginPath();
@@ -155,7 +160,7 @@
   }
 
   function resolveExportScale(metadata) {
-    return QUALITY_SCALES[metadata.quality] || QUALITY_SCALES.medium;
+    return QUALITY_SCALES[metadata.quality] || QUALITY_SCALES.high;
   }
 
   function setExportStatus(statusEl, message, isError = false) {
@@ -410,16 +415,14 @@
     const scaleSpec = buildScaleBarSpec(metadata, mapWidth, captureScale);
     const scaleHeight = scaleBarBlockHeight();
     const scaleTop = mapHeight - margin - scaleHeight;
-    const scaleLeft = mapWidth - margin - scaleSpec.barWidthPx;
+    const scaleLeft = margin;
     drawScaleBar(ctx, scaleLeft, scaleTop, scaleSpec, color);
 
     if (legendItems.length) {
       const legendWidth = measureLegendWidth(ctx, legendItems);
       const legendHeight = legendBlockHeight(legendItems);
-      const legendGap = 12 * LEGEND_SCALE;
-      const legendBottom = scaleTop - legendGap;
-      const legendY = Math.max(margin, legendBottom - legendHeight);
       const legendX = mapWidth - margin - legendWidth;
+      const legendY = mapHeight - margin - legendHeight;
       drawArcGisLegend(ctx, legendX, legendY, legendItems);
     }
 
@@ -428,7 +431,7 @@
 
   function buildFramedCanvas(mapCanvas, metadata) {
     const padding = 48;
-    const headerHeight = 78;
+    const headerHeight = TITLE_FONT_SIZE + 12 + SUBTITLE_FONT_SIZE + 24;
     const footerHeight = 44;
     const framed = document.createElement("canvas");
     framed.width = mapCanvas.width + padding * 2;
@@ -439,12 +442,12 @@
     ctx.fillRect(0, 0, framed.width, framed.height);
 
     ctx.fillStyle = "#17201e";
-    ctx.font = "700 30px Arial, Helvetica, sans-serif";
-    ctx.fillText(metadata.title, padding, padding + 30);
+    ctx.font = `700 ${TITLE_FONT_SIZE}px Arial, Helvetica, sans-serif`;
+    ctx.fillText(metadata.title, padding, padding + TITLE_FONT_SIZE);
 
     ctx.fillStyle = "#5b6764";
-    ctx.font = "600 17px Arial, Helvetica, sans-serif";
-    ctx.fillText(metadata.subtitle, padding, padding + 58);
+    ctx.font = `600 ${SUBTITLE_FONT_SIZE}px Arial, Helvetica, sans-serif`;
+    ctx.fillText(metadata.subtitle, padding, padding + TITLE_FONT_SIZE + 12 + SUBTITLE_FONT_SIZE);
 
     const mapY = padding + headerHeight;
     ctx.strokeStyle = "#d8dfda";
@@ -511,24 +514,20 @@
     const framedCanvas = await buildExportCanvas(map, getMetadata);
     const imageData = framedCanvas.toDataURL("image/png");
 
+    const margin = 6;
+    const pxToPt = 72 / 96;
+    const renderWidth = framedCanvas.width * pxToPt;
+    const renderHeight = framedCanvas.height * pxToPt;
+    const pageWidth = renderWidth + margin * 2;
+    const pageHeight = renderHeight + margin * 2;
+
     const pdf = new global.jspdf.jsPDF({
-      orientation: framedCanvas.width >= framedCanvas.height ? "landscape" : "portrait",
       unit: "pt",
-      format: "a4"
+      format: [pageWidth, pageHeight],
+      orientation: pageWidth >= pageHeight ? "landscape" : "portrait"
     });
 
-    const pageWidth = pdf.internal.pageSize.getWidth();
-    const pageHeight = pdf.internal.pageSize.getHeight();
-    const margin = 24;
-    const maxWidth = pageWidth - margin * 2;
-    const maxHeight = pageHeight - margin * 2;
-    const scale = Math.min(maxWidth / framedCanvas.width, maxHeight / framedCanvas.height);
-    const renderWidth = framedCanvas.width * scale;
-    const renderHeight = framedCanvas.height * scale;
-    const offsetX = (pageWidth - renderWidth) / 2;
-    const offsetY = (pageHeight - renderHeight) / 2;
-
-    pdf.addImage(imageData, "PNG", offsetX, offsetY, renderWidth, renderHeight, undefined, "FAST");
+    pdf.addImage(imageData, "PNG", margin, margin, renderWidth, renderHeight, undefined, "FAST");
     pdf.save(buildFilename(metadata, "pdf"));
   }
 

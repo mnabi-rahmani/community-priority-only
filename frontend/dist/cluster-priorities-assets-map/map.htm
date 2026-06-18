@@ -48,11 +48,26 @@
       <label class="map-export-field">
         <span>Quality</span>
         <select id="exportQualitySelect">
-          <option value="high">High</option>
-          <option value="medium" selected>Medium</option>
+          <option value="high" selected>High</option>
+          <option value="medium">Medium</option>
           <option value="low">Low</option>
         </select>
       </label>
+      <fieldset id="priorityLabelAdjustFields" class="map-export-fieldset" hidden>
+        <legend>Priority labels</legend>
+        <label class="map-export-field map-export-slider-field">
+          <span>Text size <output id="priorityLabelSizeValue" for="priorityLabelSizeSlider">100%</output></span>
+          <input id="priorityLabelSizeSlider" type="range" min="50" max="200" step="5" value="100">
+        </label>
+        <label class="map-export-field map-export-slider-field">
+          <span>Words per line <output id="priorityLabelWidthValue" for="priorityLabelWidthSlider">6</output></span>
+          <input id="priorityLabelWidthSlider" type="range" min="2" max="14" step="1" value="6">
+        </label>
+        <label class="map-export-field map-export-slider-field">
+          <span>Line height <output id="priorityLabelHeightValue" for="priorityLabelHeightSlider">1.2</output></span>
+          <input id="priorityLabelHeightSlider" type="range" min="80" max="200" step="5" value="120">
+        </label>
+      </fieldset>
       <div class="map-export-pill-actions">
         <button type="button" id="exportPngBtn" class="map-export-btn map-export-btn-primary" aria-busy="false">Export PNG</button>
         <button type="button" id="exportPdfBtn" class="map-export-btn" aria-busy="false">Export PDF</button>

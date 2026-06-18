@@ -523,6 +523,46 @@
       border-color: var(--flood);
     }
 
+    .map-export-fieldset {
+      border: 1px solid var(--line);
+      border-radius: 12px;
+      display: grid;
+      gap: 8px;
+      margin: 0;
+      padding: 10px 12px 12px;
+    }
+
+    .map-export-fieldset[hidden] {
+      display: none !important;
+    }
+
+    .map-export-fieldset legend {
+      color: var(--ink);
+      font-size: 0.72rem;
+      font-weight: 800;
+      letter-spacing: 0.03em;
+      padding: 0 4px;
+      text-transform: uppercase;
+    }
+
+    .map-export-slider-field input[type="range"] {
+      width: 100%;
+      min-height: 0;
+      padding: 0;
+      border: 0;
+      background: transparent;
+      accent-color: #2f7d72;
+      cursor: pointer;
+    }
+
+    .map-export-slider-field output {
+      color: var(--ink);
+      font-size: 0.72rem;
+      font-weight: 700;
+      letter-spacing: 0;
+      text-transform: none;
+    }
+
     .map-export-pill-actions {
       display: grid;
       grid-template-columns: 1fr 1fr;
@@ -1022,6 +1062,49 @@
         1px 1px 2px #ffffff,
         -1px -1px 2px #ffffff,
         0 0 5px #ffffff;
+    }
+
+    .priority-label-anchor {
+      background: transparent;
+      border: 0;
+    }
+
+    .priority-intervention-label {
+      background: transparent;
+      border: 0;
+      box-shadow: none;
+      padding: 0;
+      pointer-events: none;
+      white-space: normal;
+    }
+
+    .leaflet-tooltip.priority-intervention-label {
+      max-width: none !important;
+      white-space: normal;
+      width: auto !important;
+    }
+
+    .priority-intervention-label-text {
+      box-sizing: border-box;
+      color: #4a5568;
+      display: inline-block;
+      font-family: Arial, Helvetica, sans-serif;
+      font-size: calc(0.702rem * var(--priority-label-scale, 1));
+      font-weight: 600;
+      hyphens: none;
+      line-height: 1.2;
+      overflow-wrap: normal;
+      text-align: center;
+      text-shadow:
+        1px 1px 2px #ffffff,
+        -1px -1px 2px #ffffff,
+        0 0 4px #ffffff;
+      white-space: normal;
+      word-break: normal;
+    }
+
+    .priority-intervention-label::before {
+      display: none;
     }
 
     .non-interactive-boundary {
