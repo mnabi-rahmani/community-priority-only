@@ -193,6 +193,9 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     const basemapFilter = document.getElementById("basemapFilter");
     const filterSummary = document.getElementById("filterSummary");
     const toggleAllLayersSidebar = document.getElementById("toggleAllLayersSidebar");
+    function selectedVillage() {
+      return villageFilter?.value || "All";
+    }
     const storyText = document.getElementById("storyText");
     const cards = document.getElementById("cards");
     const cardsEmpty = document.getElementById("cardsEmpty");
@@ -996,7 +999,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
 
     function featureMatchesFilters(props, entry) {
       const cluster = clusterFilter.value;
-      const village = villageFilter.value;
+      const village = selectedVillage();
 
       if (entry.group === "Boundaries") {
         if (entry.id === "boundary_cluster") {
@@ -1402,6 +1405,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     }
 
     function populateVillageFilter() {
+      if (!villageFilter) return;
       const selectedCluster = clusterFilter.value;
       const communities = communityNamesForCluster(selectedCluster);
       const previous = villageFilter.value;
@@ -1417,7 +1421,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
 
     function filteredPriorityPoints() {
       const cluster = clusterFilter.value;
-      const village = villageFilter.value;
+      const village = selectedVillage();
       const clusterCounters = new Map();
       return ALL_PRIORITY_POINTS
         .filter((point) => {
@@ -1565,7 +1569,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
         marker.addTo(priorityGroup);
       });
 
-      if (clusterFilter.value === "Cluster 3" && villageFilter.value === "All") {
+      if (clusterFilter.value === "Cluster 3" && selectedVillage() === "All") {
         if (!corridorLayer) {
           corridorLayer = L.polyline(
             [
@@ -1660,7 +1664,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     }
 
     window.addEventListener("load", () => {
-      if (clusterFilter.value === "All" && villageFilter.value === "All") {
+      if (clusterFilter.value === "All" && selectedVillage() === "All") {
         map.invalidateSize();
         fitToDefaultHomeView({ animate: false });
         scheduleMapLayoutRefresh();
@@ -1669,7 +1673,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
 
     function fitToSelection(points) {
       const cluster = clusterFilter.value;
-      const village = villageFilter.value;
+      const village = selectedVillage();
       const animate = cluster !== "All" || village !== "All";
 
       if (village !== "All") {
@@ -1732,9 +1736,9 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       syncExportSubtitleField();
       applyFilters(true);
     });
-    villageFilter.addEventListener("change", () => applyFilters(true));
+    villageFilter?.addEventListener("change", () => applyFilters(true));
 
-    toggleAllLayersSidebar.addEventListener("change", () => {
+    toggleAllLayersSidebar?.addEventListener("change", () => {
       setAllOverlaysVisible(toggleAllLayersSidebar.checked);
     });
 

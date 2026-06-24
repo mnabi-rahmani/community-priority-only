@@ -193,6 +193,9 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     const basemapFilter = document.getElementById("basemapFilter");
     const filterSummary = document.getElementById("filterSummary");
     const toggleAllLayersSidebar = document.getElementById("toggleAllLayersSidebar");
+    function selectedVillage() {
+      return villageFilter?.value || "All";
+    }
     const storyText = document.getElementById("storyText");
     const cards = document.getElementById("cards");
     const cardsEmpty = document.getElementById("cardsEmpty");
@@ -314,6 +317,112 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       const a = normalizeVillage(left);
       const b = normalizeVillage(right);
       return a.includes(b) || b.includes(a);
+    }
+
+    const clusterBoundaryPolygonsByName = new Map();
+    const communityBoundaryPolygonsByName = new Map();
+
+    function pointInRing(lon, lat, ring) {
+      let inside = false;
+      for (let i = 0, j = ring.length - 1; i < ring.length; j = i++) {
+        const xi = ring[i][0];
+        const yi = ring[i][1];
+        const xj = ring[j][0];
+        const yj = ring[j][1];
+        const intersects = ((yi > lat) !== (yj > lat))
+          && (lon < ((xj - xi) * (lat - yi)) / (yj - yi) + xi);
+        if (intersects) inside = !inside;
+      }
+      return inside;
+    }
+
+    function pointInPolygonRings(lon, lat, rings) {
+      if (!Array.isArray(rings) || !rings.length) return false;
+      if (!pointInRing(lon, lat, rings[0])) return false;
+      for (let i = 1; i < rings.length; i++) {
+        if (pointInRing(lon, lat, rings[i])) return false;
+      }
+      return true;
+    }
+
+    function boundaryPolygonsFromGeometry(geometry) {
+      if (!geometry) return [];
+      if (geometry.type === "Polygon") return [geometry.coordinates];
+      if (geometry.type === "MultiPolygon") return geometry.coordinates;
+      return [];
+    }
+
+    function geometryCoordPairs(geometry, pairs = []) {
+      if (!geometry) return pairs;
+      const { type, coordinates } = geometry;
+      if (type === "Point") {
+        pairs.push(coordinates);
+        return pairs;
+      }
+      if (type === "MultiPoint" || type === "LineString") {
+        coordinates.forEach((coord) => pairs.push(coord));
+        return pairs;
+      }
+      if (type === "MultiLineString" || type === "Polygon") {
+        coordinates.forEach((segment) => {
+          segment.forEach((coord) => pairs.push(coord));
+        });
+        return pairs;
+      }
+      if (type === "MultiPolygon") {
+        coordinates.forEach((polygon) => {
+          polygon.forEach((ring) => {
+            ring.forEach((coord) => pairs.push(coord));
+          });
+        });
+      }
+      return pairs;
+    }
+
+    function featureIntersectsPolygonRings(feature, rings) {
+      if (!rings?.length || !feature?.geometry) return false;
+      return geometryCoordPairs(feature.geometry).some(([lon, lat]) => pointInPolygonRings(lon, lat, rings));
+    }
+
+    function featureInClusterBoundary(feature, clusterName) {
+      const polygons = clusterBoundaryPolygonsByName.get(clusterName);
+      if (!polygons?.length) return true;
+      return polygons.some((rings) => featureIntersectsPolygonRings(feature, rings));
+    }
+
+    function featureInCommunityBoundary(feature, villageName) {
+      for (const [name, polygons] of communityBoundaryPolygonsByName) {
+        if (!villageMatches(name, villageName)) continue;
+        if (polygons.some((rings) => featureIntersectsPolygonRings(feature, rings))) {
+          return true;
+        }
+      }
+      return false;
+    }
+
+    function initBoundarySpatialIndex() {
+      clusterBoundaryPolygonsByName.clear();
+      communityBoundaryPolygonsByName.clear();
+
+      const clusterGeojson = LAYERS.boundary_cluster;
+      if (clusterGeojson) {
+        clusterGeojson.features.forEach((feature) => {
+          const name = normalizeCluster(feature.properties?.Name);
+          if (!name) return;
+          const polygons = boundaryPolygonsFromGeometry(feature.geometry);
+          if (polygons.length) clusterBoundaryPolygonsByName.set(name, polygons);
+        });
+      }
+
+      const communityGeojson = LAYERS.boundary_community;
+      if (communityGeojson) {
+        communityGeojson.features.forEach((feature) => {
+          const name = feature.properties?.Name;
+          if (!name) return;
+          const polygons = boundaryPolygonsFromGeometry(feature.geometry);
+          if (polygons.length) communityBoundaryPolygonsByName.set(name, polygons);
+        });
+      }
     }
 
     function imageSrc(path) {
@@ -994,27 +1103,44 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       });
     }
 
-    function featureMatchesFilters(props, entry) {
+    function featureMatchesFilters(feature, entry) {
+      const props = feature.properties || {};
       const cluster = clusterFilter.value;
-      const village = villageFilter.value;
+      const village = selectedVillage();
 
       if (entry.group === "Boundaries") {
         if (entry.id === "boundary_cluster") {
-          return BAGHLAN_CLUSTERS.has(normalizeCluster(props.Name));
+          const name = normalizeCluster(props.Name);
+          if (!BAGHLAN_CLUSTERS.has(name)) return false;
+          if (cluster === "All") return true;
+          return name === cluster;
         }
         if (entry.id === "boundary_community") {
-          return Boolean(props.Name);
+          if (!props.Name) return false;
+          if (village !== "All") return villageMatches(props.Name, village);
+          if (cluster === "All") return true;
+          const featureClusterValue = featureCluster(props);
+          if (featureClusterValue) return featureClusterValue === cluster;
+          return featureInClusterBoundary(feature, cluster);
         }
         return true;
       }
 
       if (cluster !== "All") {
         const featureClusterValue = featureCluster(props);
-        if (!featureClusterValue || featureClusterValue !== cluster) return false;
+        if (featureClusterValue) {
+          if (featureClusterValue !== cluster) return false;
+        } else if (!featureInClusterBoundary(feature, cluster)) {
+          return false;
+        }
       }
       if (village !== "All") {
         const featureVillageValue = featureVillage(props);
-        if (featureVillageValue && !villageMatches(featureVillageValue, village)) return false;
+        if (featureVillageValue) {
+          if (!villageMatches(featureVillageValue, village)) return false;
+        } else if (!featureInCommunityBoundary(feature, village)) {
+          return false;
+        }
       }
       return true;
     }
@@ -1025,7 +1151,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       store.group.clearLayers();
       if (!geojson) return;
 
-      const features = geojson.features.filter((feature) => featureMatchesFilters(feature.properties || {}, entry));
+      const features = geojson.features.filter((feature) => featureMatchesFilters(feature, entry));
       L.geoJSON(
         { type: "FeatureCollection", features },
         {
@@ -1402,6 +1528,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     }
 
     function populateVillageFilter() {
+      if (!villageFilter) return;
       const selectedCluster = clusterFilter.value;
       const communities = communityNamesForCluster(selectedCluster);
       const previous = villageFilter.value;
@@ -1417,7 +1544,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
 
     function filteredPriorityPoints() {
       const cluster = clusterFilter.value;
-      const village = villageFilter.value;
+      const village = selectedVillage();
       const clusterCounters = new Map();
       return ALL_PRIORITY_POINTS
         .filter((point) => {
@@ -1565,7 +1692,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
         marker.addTo(priorityGroup);
       });
 
-      if (clusterFilter.value === "Cluster 3" && villageFilter.value === "All") {
+      if (clusterFilter.value === "Cluster 3" && selectedVillage() === "All") {
         if (!corridorLayer) {
           corridorLayer = L.polyline(
             [
@@ -1660,7 +1787,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     }
 
     window.addEventListener("load", () => {
-      if (clusterFilter.value === "All" && villageFilter.value === "All") {
+      if (clusterFilter.value === "All" && selectedVillage() === "All") {
         map.invalidateSize();
         fitToDefaultHomeView({ animate: false });
         scheduleMapLayoutRefresh();
@@ -1669,7 +1796,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
 
     function fitToSelection(points) {
       const cluster = clusterFilter.value;
-      const village = villageFilter.value;
+      const village = selectedVillage();
       const animate = cluster !== "All" || village !== "All";
 
       if (village !== "All") {
@@ -1713,6 +1840,7 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
     initMapNav();
     initSideHeaderToggle();
     initPriorityMarkers();
+    initBoundarySpatialIndex();
     initDatabaseLayers();
     applyFilters(false);
     scheduleInitialMapView();
@@ -1732,9 +1860,9 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       syncExportSubtitleField();
       applyFilters(true);
     });
-    villageFilter.addEventListener("change", () => applyFilters(true));
+    villageFilter?.addEventListener("change", () => applyFilters(true));
 
-    toggleAllLayersSidebar.addEventListener("change", () => {
+    toggleAllLayersSidebar?.addEventListener("change", () => {
       setAllOverlaysVisible(toggleAllLayersSidebar.checked);
     });
 

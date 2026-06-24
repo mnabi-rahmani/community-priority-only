@@ -11,11 +11,6 @@ window.COMMUNITY_PRIORITIES_CONFIG = {
   includedLayerIds: ["boundary_cluster", "boundary_community"],
   navItems: [
     {
-      id: "assets-community-priorities",
-      label: "Assets and Community Priorities Old",
-      href: "/map.htm"
-    },
-    {
       id: "cluster-priorities-only",
       label: "Cluster Priorities Only",
       href: "/cluster-priorities-map/map.htm"
