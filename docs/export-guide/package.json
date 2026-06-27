@@ -1,0 +1,13 @@
+{
+  "name": "map-export-guide",
+  "private": true,
+  "type": "module",
+  "dependencies": {
+    "pdfkit": "^0.16.0",
+    "puppeteer-core": "^24.10.0"
+  },
+  "scripts": {
+    "capture": "node capture-screenshots.mjs",
+    "build": "node capture-screenshots.mjs && node generate-pdf.mjs"
+  }
+}

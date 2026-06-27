@@ -1,0 +1,81 @@
+.map-export-callouts-layer {
+  position: absolute;
+  inset: 0;
+  overflow: hidden;
+  pointer-events: none;
+  z-index: 650;
+}
+
+.map-export-callout-arrows {
+  position: absolute;
+  inset: 0;
+  overflow: visible;
+  pointer-events: none;
+}
+
+.map-export-callout {
+  position: absolute;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.map-export-callout-photo-wrap {
+  width: 110px;
+  height: 110px;
+  border-radius: 50%;
+  overflow: hidden;
+  border: 1.5px solid #9ca3af;
+  background: #ffffff;
+  box-shadow: 0 2px 10px rgba(15, 23, 42, 0.18);
+  flex-shrink: 0;
+  pointer-events: auto;
+  cursor: grab;
+  touch-action: none;
+}
+
+.map-export-callout.is-dragging .map-export-callout-photo-wrap {
+  cursor: grabbing;
+  border-color: #4b5563;
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.28);
+}
+
+.map-export-callout-photo {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.map-export-callout-label {
+  margin-top: 6px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #374151;
+  text-align: center;
+  white-space: nowrap;
+  text-shadow:
+    0 0 4px #ffffff,
+    0 0 4px #ffffff,
+    0 0 8px #ffffff;
+}
+
+.map-export-callout-save-status {
+  margin: 4px 0 0;
+  font-size: 11px;
+  font-weight: 600;
+  color: #166534;
+  text-align: center;
+  white-space: nowrap;
+}
+
+.map-export-callout-save-status.is-error {
+  color: #b45309;
+}
+
+.map-export-callout-arrow {
+  stroke: #6b7280;
+  stroke-width: 1.5;
+  fill: none;
+}

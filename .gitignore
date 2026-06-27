@@ -1,4 +1,4 @@
-node_modules/
+﻿node_modules/
 .serverless/
 .build/
 .env
@@ -9,6 +9,23 @@ gh-auth-*.txt
 # Local source assets; do not commit to GitHub.
 Assets Needed/
 deployed/Assets Needed/
+
+# Packaged maps — regenerate: npm run sync:all-priorities (from frontend/)
+frontend/dist/
+
+# Generated map data — regenerate: npm run generate:* (from deployed/)
+deployed/cursor_v2_map_data/
+
+# Local backup snapshots
+backups/
+
+# Binary data archives (keep source spreadsheets outside the repo)
+*.zip
+
+# Export guide generated artifacts
+docs/export-guide/node_modules/
+docs/export-guide/screenshots/
+docs/export-guide/*.pdf
 
 # Legacy recovery artifacts (removed from repo scope)
 recovered/

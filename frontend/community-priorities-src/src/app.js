@@ -2245,4 +2245,13 @@ const COMMUNITY_PRIORITIES_CONFIG = window.COMMUNITY_PRIORITIES_CONFIG || {};
       });
     }
 
+    const exportCallouts = COMMUNITY_PRIORITIES_CONFIG.exportPhotoCallouts;
+    if (Array.isArray(exportCallouts) && exportCallouts.length && window.CommunityPrioritiesMapExportCallouts) {
+      window.CommunityPrioritiesMapExportCallouts.init(map, {
+        callouts: exportCallouts,
+        mapId: COMMUNITY_PRIORITIES_CONFIG.mapId,
+        resolveAssetUrl
+      });
+    }
+
     window.communityPrioritiesMap = map;
